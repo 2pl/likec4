@@ -8,6 +8,7 @@ export {
   useCurrentZoom,
   useCurrentZoomAtLeast,
   useIsZoomTooSmall,
+  useTextScale,
   useXYFlow,
   useXYInternalNode,
   useXYStore,

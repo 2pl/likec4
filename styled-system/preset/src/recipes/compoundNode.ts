@@ -107,10 +107,23 @@ export const compoundNode = defineRecipe({
       gap: '1.5', // 6px
       left: '2.5',
       top: '0.5',
-      right: '30px',
-      width: 'auto',
       minHeight: '28px',
       color: compoundColor.ref,
+      // Magnified, when the diagram is zoomed out, so the title stays readable.
+      // Limited, otherwise the title overlaps nested compounds and elements
+      transform: {
+        _textScaled: `scale(min(var(--likec4-text-scale, 1), 1.8))`,
+      },
+      // Laid out in a narrower box, so after magnifying it does not exceed the compound
+      width: {
+        base: 'auto',
+        _textScaled: `calc((100% - 40px) / min(var(--likec4-text-scale, 1), 1.8))`,
+      },
+      right: {
+        base: '30px',
+        _textScaled: 'auto',
+      },
+      transformOrigin: 'left top',
 
       [`:where(.react-flow__node.draggable) &`]: {
         pointerEvents: 'all',

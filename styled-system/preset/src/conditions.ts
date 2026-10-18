@@ -49,6 +49,9 @@ export const conditions = {
 
     smallZoom: ':where([data-likec4-zoom-small="true"]) &',
 
+    // Text of the nodes is magnified, because the diagram is zoomed out
+    textScaled: ':where([data-likec4-text-scaled="true"]) &',
+
     compoundTransparent: ':where([data-compound-transparent]) &',
 
     edgeActive: ':where([data-likec4-edge-active="true"]) &',
