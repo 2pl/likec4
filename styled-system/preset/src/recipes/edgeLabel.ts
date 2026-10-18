@@ -31,6 +31,15 @@ export const edgeLabel = defineRecipe({
       background: 'var(--xy-edge-label-background-color)',
       border: '0px solid transparent',
       borderRadius: '4px',
+      // Magnified, when the diagram is zoomed out, so the label stays readable.
+      // Uses `scale` (not `transform`), as the hover animation owns `transform`.
+      // Limited, otherwise labels overlap each other and the nodes
+      scale: {
+        _labelScaled: `min(var(--likec4-label-scale, 1), 2.2)`,
+      },
+      transformOrigin: {
+        _labelScaled: 'var(--likec4-edge-label-origin, center)',
+      },
     },
     stepNumber: {
       alignSelf: 'stretch',
@@ -105,6 +114,10 @@ export const edgeLabel = defineRecipe({
       false: {},
       true: parts({
         root: {
+          // Step labels sit in their own column, there is more room to grow
+          scale: {
+            _labelScaled: `min(var(--likec4-label-scale, 1), 3)`,
+          },
           flexDirection: 'row',
           gap: '1',
           padding: '0',

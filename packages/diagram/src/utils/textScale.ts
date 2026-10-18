@@ -18,6 +18,17 @@ export const READABLE_TEXT_SCALE = 0.7
 export const MAX_TEXT_SCALE = 2.6
 
 /**
+ * Same as {@link READABLE_TEXT_SCALE}, for relationship labels.
+ * Labels are small (and do not have a box to wrap into), so they need a bigger target than the titles
+ */
+export const READABLE_LABEL_SCALE = 0.9
+
+/**
+ * Max magnification of the labels (limited further by the preset, depending on the edge type)
+ */
+export const MAX_LABEL_SCALE = 3.2
+
+/**
  * Magnification changes in steps of this size, to avoid restyling the diagram on every wheel tick
  */
 const TEXT_SCALE_STEP = 0.2
@@ -30,29 +41,59 @@ const TEXT_SCALE_STEP = 0.2
  *
  * @returns 1 if the text is readable, otherwise up to {@link MAX_TEXT_SCALE}
  */
-export function calcTextScale(zoom: number): number {
+export function calcTextScale(
+  zoom: number,
+  readable: number = READABLE_TEXT_SCALE,
+  max: number = MAX_TEXT_SCALE,
+): number {
   if (!(zoom > 0)) {
-    return MAX_TEXT_SCALE
+    return max
   }
-  const scale = clamp(READABLE_TEXT_SCALE / zoom, { min: 1, max: MAX_TEXT_SCALE })
+  const scale = clamp(readable / zoom, { min: 1, max })
   // toFixed removes the floating point noise (i.e. 1.4000000000000001)
   return Number((Math.round(scale / TEXT_SCALE_STEP) * TEXT_SCALE_STEP).toFixed(1))
 }
 
 /**
- * Attributes and styles for the diagram root, to magnify the text of the nodes (see {@link calcTextScale}).
- * Magnified text is styled by the preset (conditions `textScaled`, variable `--likec4-text-scale`).
+ * Magnification of the relationship labels for a given zoom level.
+ * @see calcTextScale
+ */
+export function calcLabelScale(zoom: number): number {
+  return calcTextScale(zoom, READABLE_LABEL_SCALE, MAX_LABEL_SCALE)
+}
+
+export type TextScaleProps = {
+  'data-likec4-text-scaled'?: true
+  'data-likec4-label-scaled'?: true
+  style: CSSVariables
+}
+
+/**
+ * Attributes and styles for the diagram root, to magnify the text of the nodes (see {@link calcTextScale})
+ * and the relationship labels (see {@link calcLabelScale}).
+ * Magnified text is styled by the preset (conditions `textScaled` and `labelScaled`,
+ * variables `--likec4-text-scale` and `--likec4-label-scale`).
+ * Nodes and labels are magnified independently, the attribute is set only for those that need it.
  *
  * @returns `null` if the text is readable and nothing should be changed
  */
 export function textScaleProps(
   scale: number,
-): { 'data-likec4-text-scaled': true; style: CSSVariables } | null {
-  if (!(scale > 1)) {
+  labelScale: number = scale,
+): TextScaleProps | null {
+  const isTextScaled = scale > 1
+  const isLabelScaled = labelScale > 1
+  if (!isTextScaled && !isLabelScaled) {
     return null
   }
-  return {
-    'data-likec4-text-scaled': true,
-    style: { '--likec4-text-scale': scale },
+  const props: TextScaleProps = { style: {} }
+  if (isTextScaled) {
+    props['data-likec4-text-scaled'] = true
+    props.style['--likec4-text-scale'] = scale
   }
+  if (isLabelScaled) {
+    props['data-likec4-label-scaled'] = true
+    props.style['--likec4-label-scale'] = labelScale
+  }
+  return props
 }

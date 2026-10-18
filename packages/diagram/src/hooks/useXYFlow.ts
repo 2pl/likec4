@@ -10,7 +10,7 @@ import {
 import { shallowEqual } from 'fast-equals'
 import { useCallback } from 'react'
 import type { Types } from '../likec4diagram/types'
-import { calcTextScale } from '../utils/textScale'
+import { calcLabelScale, calcTextScale } from '../utils/textScale'
 
 export type XYFlowInstance = ReactFlowInstance<Types.AnyNode, Types.AnyEdge>
 export function useXYFlow(): XYFlowInstance {
@@ -72,4 +72,14 @@ const selectTextScale = (state: ReactFlowState) => calcTextScale(state.transform
  */
 export function useTextScale(): number {
   return useStore(selectTextScale)
+}
+
+const selectLabelScale = (state: ReactFlowState) => calcLabelScale(state.transform[2])
+/**
+ * Magnification of the relationship labels, to keep them readable when the diagram is zoomed out.
+ * Returns 1 if the labels are readable
+ * @see calcLabelScale
+ */
+export function useLabelScale(): number {
+  return useStore(selectLabelScale)
 }

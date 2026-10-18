@@ -18,7 +18,7 @@ import { type KeyboardEvent, useMemo } from 'react'
 import type { SetRequired, Simplify } from 'type-fest'
 import { useCallbackRef } from '../hooks/useCallbackRef'
 import { useUpdateEffect } from '../hooks/useUpdateEffect'
-import { useIsZoomTooSmall, useTextScale, useXYFlow, useXYStoreApi } from '../hooks/useXYFlow'
+import { useIsZoomTooSmall, useLabelScale, useTextScale, useXYFlow, useXYStoreApi } from '../hooks/useXYFlow'
 import type { ViewPadding } from '../LikeC4Diagram.props'
 import { roundDpr } from '../utils/roundDpr'
 import { textScaleProps } from '../utils/textScale'
@@ -156,7 +156,8 @@ export function BaseXYFlow<
   const isBgWithPattern = background !== 'transparent' && background !== 'solid'
   const isZoomTooSmall = useIsZoomTooSmall()
   const textScale = useTextScale()
-  const scaleProps = textScaleProps(textScale)
+  const labelScale = useLabelScale()
+  const scaleProps = textScaleProps(textScale, labelScale)
   const style = scaleProps ? { ...props.style, ...scaleProps.style } : props.style
   const xyflow = useXYFlow()
   const xystore = useXYStoreApi()
@@ -305,7 +306,8 @@ export function BaseXYFlow<
         }
       })}
       {...props}
-      {...scaleProps && { 'data-likec4-text-scaled': scaleProps['data-likec4-text-scaled'] }}
+      data-likec4-text-scaled={scaleProps?.['data-likec4-text-scaled']}
+      data-likec4-label-scaled={scaleProps?.['data-likec4-label-scaled']}
       style={style}
       aria-label={ariaLabel}
       tabIndex={tabIndex}
