@@ -1,0 +1,79 @@
+deployment {
+
+  node device 'Trader Device' {
+    instanceOf trading.clients.mobile
+    instanceOf trading.clients.web
+  }
+
+  environment prod 'Production' {
+
+    region useast 'AWS us-east-1' {
+      description 'Primary region'
+
+      node edge 'Edge Load Balancers' {
+        instanceOf trading.edge.apiGateway
+      }
+
+      cluster eks 'EKS Cluster' {
+        namespace platform 'platform' {
+          instanceOf trading.edge.auth
+          instanceOf trading.notifier
+        }
+        namespace execution 'execution' {
+          orderPrimary = instanceOf trading.core.orderService
+          orderStandby = instanceOf trading.core.orderService
+          instanceOf trading.core.riskEngine
+        }
+        namespace data 'market-data' {
+          instanceOf trading.marketData.quoteService
+        }
+        namespace funds 'accounts' {
+          instanceOf trading.accounts.portfolioService
+          instanceOf trading.accounts.walletService
+        }
+        namespace oversight 'compliance' {
+          instanceOf trading.compliance.surveillance
+          instanceOf trading.compliance.reporting
+        }
+      }
+
+      node msk 'Amazon MSK' {
+        instanceOf trading.events
+      }
+      node rds 'Amazon RDS (Multi-AZ)' {
+        instanceOf trading.core.ordersDb
+        ledgerPrimary = instanceOf trading.accounts.ledgerDb
+        instanceOf trading.marketData.tickStore
+      }
+      node elasticache 'ElastiCache' {
+        instanceOf trading.marketData.quoteCache
+      }
+    }
+
+    datacenter ny4 'Equinix NY4' {
+      description 'Colocated next to the exchange matching engines'
+
+      node gateways 'Bare-metal Trading Hosts' {
+        technology 'Kernel bypass NICs'
+        instanceOf trading.core.router
+        instanceOf trading.core.executionGateway
+        instanceOf trading.marketData.feedHandler
+      }
+    }
+
+    region uswest 'AWS us-west-2' {
+      description 'Disaster recovery region'
+
+      node rdsReplica 'Amazon RDS (read replica)' {
+        ledgerReplica = instanceOf trading.accounts.ledgerDb
+      }
+    }
+
+    useast.rds.ledgerPrimary -> uswest.rdsReplica.ledgerReplica 'Replicates' {
+      technology 'Cross-region async replication'
+    }
+    ny4 -> useast 'Dedicated link' {
+      technology 'AWS Direct Connect'
+    }
+  }
+}

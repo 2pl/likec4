@@ -1,0 +1,236 @@
+model {
+
+  actor trader 'Retail Trader' {
+    description 'Places orders, tracks positions and funds the account'
+  }
+
+  actor complianceOfficer 'Compliance Officer' {
+    description 'Investigates alerts and signs off regulatory reports'
+  }
+
+  externalSystem exchanges 'Exchanges & Venues' {
+    description 'NASDAQ, NYSE, dark pools and market makers'
+    technology 'FIX 4.4 / ITCH'
+  }
+
+  externalSystem marketDataVendor 'Market Data Vendor' {
+    description 'Consolidated feed and reference data'
+  }
+
+  externalSystem bank 'Banking Partner' {
+    description 'ACH / wire transfers and custody of client funds'
+  }
+
+  externalSystem kycProvider 'KYC Provider' {
+    description 'Identity verification and sanctions screening'
+  }
+
+  externalSystem regulator 'Regulator' {
+    description 'Receives trade and transaction reports'
+  }
+
+  externalSystem pushProvider 'Push & Email Provider' {
+    description 'APNs, FCM and transactional email'
+  }
+
+  system trading 'Trading Platform' {
+    description 'Retail brokerage platform for equities and ETFs'
+
+    domain clients 'Client Apps' {
+      webApp web 'Web Trader' {
+        technology 'React, TypeScript'
+        description 'Browser trading terminal with live charts'
+        style {
+          icon tech:react
+        }
+      }
+      mobileApp mobile 'Mobile App' {
+        technology 'React Native'
+        description 'iOS and Android trading app'
+      }
+    }
+
+    domain edge 'Edge' {
+      service apiGateway 'API Gateway' {
+        #critical
+        technology 'Envoy'
+        description 'Routing, rate limiting, REST and WebSocket termination'
+      }
+      service auth 'Identity Service' {
+        technology 'Go, OIDC'
+        description 'Login, MFA, sessions and onboarding'
+      }
+    }
+
+    domain core 'Order Execution' {
+      description 'The order lifecycle from intake to fill'
+
+      service orderService 'Order Management' {
+        #critical
+        technology 'Kotlin'
+        description 'Validates, persists and tracks the order lifecycle'
+      }
+      service riskEngine 'Pre-Trade Risk Engine' {
+        #critical #regulated
+        technology 'Rust'
+        description 'Buying power, position limits and price collars'
+      }
+      service router 'Smart Order Router' {
+        #critical #lowLatency
+        technology 'Rust'
+        description 'Picks the venue with the best execution'
+      }
+      service executionGateway 'Execution Gateway' {
+        #critical #lowLatency
+        technology 'C++, FIX'
+        description 'Holds FIX sessions with venues'
+      }
+      database ordersDb 'Orders DB' {
+        technology 'PostgreSQL'
+        description 'Orders and executions'
+        style {
+          icon tech:postgresql
+        }
+      }
+    }
+
+    domain marketData 'Market Data' {
+      service feedHandler 'Feed Handler' {
+        #lowLatency
+        technology 'C++'
+        description 'Normalizes raw exchange and vendor feeds'
+      }
+      service quoteService 'Quote Service' {
+        technology 'Go, WebSocket'
+        description 'Streams quotes and serves price history'
+      }
+      cache quoteCache 'Quote Cache' {
+        technology 'Redis'
+        description 'Last price and top of book per symbol'
+        style {
+          icon tech:redis
+        }
+      }
+      database tickStore 'Tick Store' {
+        technology 'TimescaleDB'
+        description 'Historical ticks and OHLC candles'
+      }
+    }
+
+    domain accounts 'Accounts & Funds' {
+      service portfolioService 'Portfolio Service' {
+        technology 'Kotlin'
+        description 'Positions, P&L and buying power'
+      }
+      service walletService 'Wallet Service' {
+        #regulated
+        technology 'Kotlin'
+        description 'Deposits, withdrawals and cash balances'
+      }
+      database ledgerDb 'Ledger DB' {
+        #critical
+        technology 'PostgreSQL'
+        description 'Double-entry ledger of cash and securities'
+        style {
+          icon tech:postgresql
+        }
+      }
+    }
+
+    domain compliance 'Compliance' {
+      service surveillance 'Trade Surveillance' {
+        #regulated
+        technology 'Python, Flink'
+        description 'Detects wash trading, spoofing and layering'
+      }
+      service reporting 'Regulatory Reporting' {
+        #regulated
+        technology 'Python'
+        description 'Builds and submits trade reports'
+      }
+    }
+
+    service notifier 'Notification Service' {
+      technology 'Node.js'
+      description 'Order fills, price alerts and statements'
+    }
+
+    eventBus events 'Event Bus' {
+      #critical
+      technology 'Kafka'
+      description 'Order, execution and market events'
+      style {
+        icon tech:kafka
+      }
+    }
+  }
+
+  // People
+  trader -> trading.clients.web 'Trades in the browser'
+  trader -> trading.clients.mobile 'Trades on the go'
+  complianceOfficer -> trading.compliance.surveillance 'Reviews alerts'
+  complianceOfficer -> trading.compliance.reporting 'Approves reports'
+
+  // Clients to edge
+  trading.clients.web -> trading.edge.apiGateway 'Calls API, subscribes to quotes' {
+    technology 'HTTPS, WebSocket'
+  }
+  trading.clients.mobile -> trading.edge.apiGateway 'Calls API, subscribes to quotes' {
+    technology 'HTTPS, WebSocket'
+  }
+
+  // Edge fan-out
+  trading.edge.apiGateway -> trading.edge.auth 'Authenticates requests'
+  trading.edge.apiGateway -> trading.core.orderService 'Places and cancels orders' {
+    technology 'gRPC'
+  }
+  trading.edge.apiGateway -> trading.marketData.quoteService 'Streams quotes'
+  trading.edge.apiGateway -> trading.accounts.portfolioService 'Reads positions'
+  trading.edge.apiGateway -> trading.accounts.walletService 'Deposits and withdrawals'
+  trading.edge.auth -> kycProvider 'Verifies identity'
+
+  // Order execution
+  trading.core.orderService -> trading.core.riskEngine 'Pre-trade check' {
+    technology 'gRPC'
+  }
+  trading.core.orderService -> trading.core.ordersDb 'Persists orders'
+  trading.core.orderService -[async]-> trading.events 'Publishes order events'
+  trading.core.riskEngine -> trading.accounts.portfolioService 'Reads buying power'
+  trading.core.riskEngine -> trading.marketData.quoteCache 'Reads reference price'
+  trading.events -[async]-> trading.core.router 'Accepted orders'
+  trading.core.router -> trading.marketData.quoteCache 'Reads venue quotes'
+  trading.core.router -> trading.core.executionGateway 'Routes child orders'
+  trading.core.executionGateway -[fix]-> exchanges 'Sends orders, receives fills' {
+    technology 'FIX 4.4'
+  }
+  trading.core.executionGateway -[async]-> trading.events 'Publishes executions'
+
+  // Market data
+  exchanges -[fix]-> trading.marketData.feedHandler 'Direct feeds' {
+    technology 'ITCH / multicast'
+  }
+  marketDataVendor -> trading.marketData.feedHandler 'Consolidated feed'
+  trading.marketData.feedHandler -> trading.marketData.quoteCache 'Updates top of book'
+  trading.marketData.feedHandler -[async]-> trading.events 'Publishes ticks'
+  trading.events -[async]-> trading.marketData.quoteService 'Ticks'
+  trading.marketData.quoteService -> trading.marketData.quoteCache 'Reads snapshots'
+  trading.marketData.quoteService -> trading.marketData.tickStore 'Stores and queries candles'
+
+  // Accounts and funds
+  trading.events -[async]-> trading.accounts.portfolioService 'Executions'
+  trading.accounts.portfolioService -> trading.accounts.ledgerDb 'Books trades'
+  trading.accounts.walletService -> trading.accounts.ledgerDb 'Books cash movements'
+  trading.accounts.walletService -> bank 'Initiates transfers' {
+    technology 'ACH, wire'
+  }
+
+  // Compliance
+  trading.events -[async]-> trading.compliance.surveillance 'Orders and executions'
+  trading.events -[async]-> trading.compliance.reporting 'Executions'
+  trading.compliance.reporting -> regulator 'Submits trade reports'
+
+  // Notifications
+  trading.events -[async]-> trading.notifier 'Fills and alerts'
+  trading.notifier -> pushProvider 'Sends push and email'
+  pushProvider -> trader 'Notifies'
+}

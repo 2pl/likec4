@@ -1,0 +1,116 @@
+specification {
+
+  element actor {
+    notation 'Person'
+    style {
+      shape person
+      color green
+    }
+  }
+
+  element system {
+    notation 'Software system'
+    style {
+      opacity 10%
+    }
+  }
+
+  element externalSystem {
+    notation 'External system'
+    style {
+      color muted
+    }
+  }
+
+  element domain {
+    notation 'Bounded context'
+    style {
+      opacity 20%
+    }
+  }
+
+  element webApp {
+    notation 'Web application'
+    style {
+      shape browser
+    }
+  }
+
+  element mobileApp {
+    notation 'Mobile application'
+    style {
+      shape mobile
+    }
+  }
+
+  element service {
+    notation 'Service'
+  }
+
+  element database {
+    notation 'Database'
+    style {
+      shape storage
+      color indigo
+    }
+  }
+
+  element cache {
+    notation 'In-memory store'
+    style {
+      shape cylinder
+      color indigo
+    }
+  }
+
+  element eventBus {
+    notation 'Event log'
+    style {
+      shape queue
+      color amber
+    }
+  }
+
+  // Asynchronous messaging over the event log
+  relationship async {
+    color amber
+    line dotted
+  }
+
+  // Low-latency binary/FIX market connectivity
+  relationship fix {
+    color red
+    line solid
+  }
+
+  tag critical {
+    color #E5484D
+  }
+  tag lowLatency
+  tag regulated
+
+  deploymentNode environment {
+    notation 'Environment'
+    style {
+      color gray
+    }
+  }
+  deploymentNode region {
+    notation 'Cloud region'
+  }
+  deploymentNode datacenter {
+    notation 'Colocation datacenter'
+    style {
+      color red
+    }
+  }
+  deploymentNode cluster {
+    notation 'Kubernetes cluster'
+  }
+  deploymentNode namespace {
+    notation 'Kubernetes namespace'
+  }
+  deploymentNode node {
+    notation 'Host / managed service'
+  }
+}
