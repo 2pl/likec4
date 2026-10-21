@@ -358,6 +358,15 @@ describe('LikeC4', () => {
           ],
           "folder": "rank-for-better-layout",
         },
+        "trading-app": {
+          "documents": [
+            "deployment.c4",
+            "model.c4",
+            "spec.c4",
+            "views.c4",
+          ],
+          "folder": "trading-app",
+        },
       }
     `)
   })
