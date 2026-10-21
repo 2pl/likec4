@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { calcLabelScale, calcTextScale, MAX_TEXT_SCALE, READABLE_TEXT_SCALE, textScaleProps } from './textScale'
+import {
+  calcLabelScale,
+  calcLevelTextScale,
+  calcTextScale,
+  MAX_TEXT_SCALE,
+  READABLE_TEXT_LEVELS,
+  READABLE_TEXT_SCALE,
+  textScaleProps,
+} from './textScale'
 
 describe('calcTextScale', () => {
   it('does not change the text if it is readable', () => {
@@ -85,5 +93,32 @@ describe('calcLabelScale', () => {
 
   it('does not change readable labels', () => {
     expect(calcLabelScale(1)).toBe(1)
+  })
+})
+
+describe('readable text levels', () => {
+  it('normal level keeps the default values', () => {
+    expect(calcLevelTextScale(0.5, 'normal')).toBe(calcTextScale(0.5))
+    expect(calcLabelScale(0.5, 'normal')).toBe(calcLabelScale(0.5))
+  })
+
+  it('larger levels magnify more, and earlier', () => {
+    expect(calcLevelTextScale(0.8, 'normal')).toBe(1)
+    expect(calcLevelTextScale(0.8, 'large')).toBe(1.2)
+    expect(calcLevelTextScale(0.8, 'xlarge')).toBe(1.8)
+    // xlarge keeps the text larger than normal even at 100%
+    expect(calcLevelTextScale(1, 'xlarge')).toBe(1.4)
+  })
+
+  it('larger levels have higher limits', () => {
+    expect(calcLevelTextScale(0.01, 'large')).toBe(READABLE_TEXT_LEVELS.large.text.max)
+    expect(calcLevelTextScale(0.01, 'xlarge')).toBe(READABLE_TEXT_LEVELS.xlarge.text.max)
+    expect(READABLE_TEXT_LEVELS.xlarge.text.max).toBeGreaterThan(READABLE_TEXT_LEVELS.large.text.max)
+    expect(READABLE_TEXT_LEVELS.large.text.max).toBeGreaterThan(MAX_TEXT_SCALE)
+  })
+
+  it('passes the limit factor of the preset only when it differs from the default', () => {
+    expect(textScaleProps(1.4, 1.4, 1.3)?.style['--likec4-text-cap']).toBe(1.3)
+    expect(textScaleProps(1.4, 1.4)?.style).not.toHaveProperty('--likec4-text-cap')
   })
 })

@@ -34,6 +34,42 @@ export const MAX_LABEL_SCALE = 3.2
 const TEXT_SCALE_STEP = 0.2
 
 /**
+ * How large the text is kept, when the diagram is zoomed out
+ */
+export const ReadableTextLevels = ['normal', 'large', 'xlarge'] as const
+export type ReadableTextLevel = typeof ReadableTextLevels[number]
+
+export type ReadableTextLevelValues = {
+  text: { readable: number; max: number }
+  label: { readable: number; max: number }
+  /**
+   * Multiplier of the magnification limits set by the preset (edge types, compound titles)
+   */
+  capFactor: number
+}
+
+/**
+ * Readability targets and limits for each {@link ReadableTextLevel}
+ */
+export const READABLE_TEXT_LEVELS: Record<ReadableTextLevel, ReadableTextLevelValues> = {
+  normal: {
+    text: { readable: READABLE_TEXT_SCALE, max: MAX_TEXT_SCALE },
+    label: { readable: READABLE_LABEL_SCALE, max: MAX_LABEL_SCALE },
+    capFactor: 1,
+  },
+  large: {
+    text: { readable: 1, max: 3.4 },
+    label: { readable: 1.2, max: 4.2 },
+    capFactor: 1.3,
+  },
+  xlarge: {
+    text: { readable: 1.4, max: 4.2 },
+    label: { readable: 1.6, max: 5.2 },
+    capFactor: 1.6,
+  },
+}
+
+/**
  * Magnification of the text for a given zoom level.
  *
  * Large diagrams are zoomed out to fit the viewport, and the text of the nodes becomes unreadable.
@@ -58,8 +94,18 @@ export function calcTextScale(
  * Magnification of the relationship labels for a given zoom level.
  * @see calcTextScale
  */
-export function calcLabelScale(zoom: number): number {
-  return calcTextScale(zoom, READABLE_LABEL_SCALE, MAX_LABEL_SCALE)
+export function calcLabelScale(zoom: number, level: ReadableTextLevel = 'normal'): number {
+  const { readable, max } = READABLE_TEXT_LEVELS[level].label
+  return calcTextScale(zoom, readable, max)
+}
+
+/**
+ * Magnification of the text of the nodes for a given zoom level and {@link ReadableTextLevel}.
+ * @see calcTextScale
+ */
+export function calcLevelTextScale(zoom: number, level: ReadableTextLevel): number {
+  const { readable, max } = READABLE_TEXT_LEVELS[level].text
+  return calcTextScale(zoom, readable, max)
 }
 
 export type TextScaleProps = {
@@ -72,7 +118,7 @@ export type TextScaleProps = {
  * Attributes and styles for the diagram root, to magnify the text of the nodes (see {@link calcTextScale})
  * and the relationship labels (see {@link calcLabelScale}).
  * Magnified text is styled by the preset (conditions `textScaled` and `labelScaled`,
- * variables `--likec4-text-scale` and `--likec4-label-scale`).
+ * variables `--likec4-text-scale`, `--likec4-label-scale` and `--likec4-text-cap`).
  * Nodes and labels are magnified independently, the attribute is set only for those that need it.
  *
  * @returns `null` if the text is readable and nothing should be changed
@@ -80,6 +126,7 @@ export type TextScaleProps = {
 export function textScaleProps(
   scale: number,
   labelScale: number = scale,
+  capFactor: number = 1,
 ): TextScaleProps | null {
   const isTextScaled = scale > 1
   const isLabelScaled = labelScale > 1
@@ -87,6 +134,9 @@ export function textScaleProps(
     return null
   }
   const props: TextScaleProps = { style: {} }
+  if (capFactor !== 1) {
+    props.style['--likec4-text-cap'] = capFactor
+  }
   if (isTextScaled) {
     props['data-likec4-text-scaled'] = true
     props.style['--likec4-text-scale'] = scale

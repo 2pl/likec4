@@ -161,6 +161,28 @@ describe('ProjectConfig schema', () => {
         expect(result.webapp?.readableText).toBe(false)
       })
 
+      it('should accept a readableText level', ({ expect }) => {
+        const result = validateConfig({
+          name: 'test',
+          webapp: {
+            readableText: 'xlarge',
+          },
+        })
+
+        expect(result.webapp?.readableText).toBe('xlarge')
+      })
+
+      it('should reject an unknown readableText level', ({ expect }) => {
+        expect(() =>
+          validateConfig({
+            name: 'test',
+            webapp: {
+              readableText: 'huge',
+            },
+          })
+        ).toThrow()
+      })
+
       it('should enable every export format when exportFormats is omitted', ({ expect }) => {
         const result = validateConfig({
           name: 'test',

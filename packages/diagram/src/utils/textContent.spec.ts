@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 import {
   type TextFitNode,
   calcTextContentThresholds,
+  cappedTextScale,
   fitsAtScale,
   maxReadableScale,
   nodeTextKind,
@@ -85,6 +86,10 @@ describe('maxReadableScale', () => {
   it('returns the max scale when everything fits', () => {
     expect(maxReadableScale(node({ width: 2000, height: 2000 }), { technology: false, text: false })).toBe(2.6)
   })
+
+  it('respects the max scale of the readable text level', () => {
+    expect(maxReadableScale(node({ width: 2000, height: 2000 }), { technology: false, text: false }, 4.2)).toBe(4.2)
+  })
 })
 
 describe('calcTextContentThresholds', () => {
@@ -110,7 +115,7 @@ describe('calcTextContentThresholds', () => {
       node({ size: 'sm', width: 100, height: 60, text: longText, kind: 'summary' }),
       node({ size: 'xs', width: 60, height: 40, technology: 'Go', text: longText, kind: 'description' }),
     ])
-    expect(thresholds).toEqual({ full: Infinity, summary: Infinity })
+    expect(thresholds).toEqual({ title: Infinity, full: Infinity, summary: Infinity })
   })
 
   it('does not count descriptions for the summary threshold', () => {
@@ -122,6 +127,38 @@ describe('calcTextContentThresholds', () => {
 
 describe('textContentMode', () => {
   it('shows everything when the text is not magnified', () => {
-    expect(textContentMode(1, { full: 1, summary: 1 })).toBe('full')
+    expect(textContentMode(1, { title: 1, full: 1, summary: 1 })).toBe('full')
+  })
+})
+
+describe('title cap', () => {
+  it('does not magnify a title until its words break', () => {
+    const n = node({ title: 'Authentication', width: 200, height: 200 })
+    const max = maxReadableScale(n, { technology: false, text: false }, 4.2)
+    expect(max).toBeGreaterThan(1)
+    expect(max).toBeLessThan(4.2)
+    expect(fitsAtScale(n, max + 0.2, { technology: false, text: false })).toBe(false)
+  })
+
+  it('limits the text scale of the whole diagram to the most constrained title', () => {
+    const thresholds = calcTextContentThresholds([
+      node({ title: 'Authentication', width: 200, height: 200 }),
+      node({ title: 'Big', width: 2000, height: 2000 }),
+    ], 4.2)
+    expect(thresholds.title).toBe(
+      maxReadableScale(node({ title: 'Authentication', width: 200, height: 200 }), {
+        technology: false,
+        text: false,
+      }, 4.2),
+    )
+    expect(cappedTextScale(4.2, thresholds)).toBe(thresholds.title)
+    expect(cappedTextScale(1.2, thresholds)).toBe(1.2)
+  })
+
+  it('ignores titles that do not fit even without magnification', () => {
+    const thresholds = calcTextContentThresholds([
+      node({ title: 'Averyveryverylongunbreakablename', width: 120, height: 80 }),
+    ], 4.2)
+    expect(thresholds.title).toBe(Infinity)
   })
 })

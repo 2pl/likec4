@@ -2,6 +2,7 @@
 //
 // Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 
+import type { ReadableTextLevel } from '@likec4/config'
 import { useStore } from '@nanostores/react'
 import type { Project } from 'likec4:projects'
 import { type WritableAtom, atom } from 'nanostores'
@@ -9,18 +10,50 @@ import { useEffect } from 'react'
 
 type ReadableTextStorage = Pick<Storage, 'getItem' | 'setItem'>
 
+/**
+ * Readable text level, `false` if disabled
+ */
+export type ReadableText = ReadableTextLevel | false
+
+/**
+ * Order of the header toggle: off, then larger and larger text
+ */
+const ReadableTextCycle: ReadonlyArray<ReadableText> = [false, 'normal', 'large', 'xlarge']
+
+/**
+ * Next value of the header toggle (wraps around to off)
+ */
+export function nextReadableText(value: ReadableText): ReadableText {
+  const index = ReadableTextCycle.indexOf(value)
+  return ReadableTextCycle[(index + 1) % ReadableTextCycle.length] ?? false
+}
+
 export function readableTextStorageKey(projectId: string) {
   return `likec4.readableText:${projectId}`
 }
 
-export function parseReadableTextOverride(value: unknown): boolean | undefined {
-  return value === 'true' ? true : value === 'false' ? false : undefined
+/**
+ * Parses a saved preference (`true` is saved by earlier versions, and means `normal`)
+ */
+export function parseReadableTextOverride(value: unknown): ReadableText | undefined {
+  switch (value) {
+    case 'false':
+      return false
+    case 'true':
+    case 'normal':
+      return 'normal'
+    case 'large':
+    case 'xlarge':
+      return value
+    default:
+      return undefined
+  }
 }
 
 export function resolveReadableText(input: {
-  savedOverride?: boolean
-  configuredDefault: boolean
-}): boolean {
+  savedOverride?: ReadableText
+  configuredDefault: ReadableText
+}): ReadableText {
   return input.savedOverride ?? input.configuredDefault
 }
 
@@ -32,7 +65,7 @@ export function resolveReadableText(input: {
 export function readReadableTextOverride(
   projectId: string,
   storage: ReadableTextStorage | undefined = browserLocalStorage(),
-): boolean | undefined {
+): ReadableText | undefined {
   if (!storage) return undefined
 
   try {
@@ -47,7 +80,7 @@ export function readReadableTextOverride(
  */
 export function saveReadableTextOverride(
   projectId: string,
-  value: boolean,
+  value: ReadableText,
   storage: ReadableTextStorage | undefined = browserLocalStorage(),
 ): boolean {
   if (!storage) return false
@@ -60,7 +93,7 @@ export function saveReadableTextOverride(
   }
 }
 
-function resolveProjectReadableText(project: Project): boolean {
+function resolveProjectReadableText(project: Project): ReadableText {
   const savedOverride = readReadableTextOverride(project.id)
   return resolveReadableText({
     ...(savedOverride !== undefined ? { savedOverride } : {}),
@@ -70,8 +103,8 @@ function resolveProjectReadableText(project: Project): boolean {
 
 // One atom per project id, so the header toggle and the diagram prop (rendered in
 // separate component trees) stay in sync without lifting state through props.
-const atomsByProject = new Map<string, WritableAtom<boolean>>()
-function atomForProject(project: Project): WritableAtom<boolean> {
+const atomsByProject = new Map<string, WritableAtom<ReadableText>>()
+function atomForProject(project: Project): WritableAtom<ReadableText> {
   let $readableText = atomsByProject.get(project.id)
   if (!$readableText) {
     $readableText = atom(resolveProjectReadableText(project))
@@ -87,7 +120,7 @@ function atomForProject(project: Project): WritableAtom<boolean> {
  * Shared across every caller for the same project, so a toggle rendered outside
  * the diagram (e.g. in the header) stays in sync with the diagram prop.
  */
-export function useReadableText(project: Project): readonly [boolean, (value: boolean) => void] {
+export function useReadableText(project: Project): readonly [ReadableText, (value: ReadableText) => void] {
   const $readableText = atomForProject(project)
   const value = useStore($readableText)
 
@@ -95,7 +128,7 @@ export function useReadableText(project: Project): readonly [boolean, (value: bo
     $readableText.set(resolveProjectReadableText(project))
   }, [$readableText, project.id, project.readableText])
 
-  const setValue = (next: boolean) => {
+  const setValue = (next: ReadableText) => {
     $readableText.set(next)
     saveReadableTextOverride(project.id, next)
   }

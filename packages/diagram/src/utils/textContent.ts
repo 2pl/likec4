@@ -152,9 +152,12 @@ function scaledContentBox({ shape, width, height }: TextFitNode) {
   }
 }
 
+function maxcharsFor(width: number, fontSize: number) {
+  return Math.max(1, Math.floor(width / (fontSize * CharWidthRatio)))
+}
+
 function linesHeight(text: string, width: number, fontSize: number, lineHeight: number, maxLines: number) {
-  const maxchars = Math.max(1, Math.floor(width / (fontSize * CharWidthRatio)))
-  return Math.min(countWrappedLines(text, maxchars), maxLines) * fontSize * lineHeight
+  return Math.min(countWrappedLines(text, maxcharsFor(width, fontSize)), maxLines) * fontSize * lineHeight
 }
 
 /**
@@ -179,7 +182,14 @@ export function fitsAtScale(
   const fontSize = node.textSize * scale
   const gap = (parts.technology && parts.text ? ContentGapTight : ContentGap) * scale
 
-  let needed = linesHeight(node.title, width, fontSize, TitleLineHeight, isSmOrXs ? 2 : 3)
+  // The title must fit whole: within its line limit, and without breaking words
+  const titleMaxLines = isSmOrXs ? 2 : 3
+  const titleMaxchars = maxcharsFor(width, fontSize)
+  const titleLines = countWrappedLines(node.title, titleMaxchars)
+  if (titleLines > titleMaxLines || node.title.split(/\s+/).some(word => word.length > titleMaxchars)) {
+    return false
+  }
+  let needed = titleLines * fontSize * TitleLineHeight
   if (parts.technology && node.technology) {
     needed += gap + linesHeight(node.technology, width, fontSize * TechnologyRatio, SecondaryLineHeight, Infinity)
   }
@@ -190,20 +200,20 @@ export function fitsAtScale(
 }
 
 /**
- * Text scales produced by `calcTextScale` (steps of 0.2)
- */
-const SCALES = Array.from(
-  { length: Math.round((MAX_TEXT_SCALE - 1) / 0.2) },
-  (_, i) => Number((1.2 + i * 0.2).toFixed(1)),
-)
-
-/**
- * Largest text scale at which the title and the given parts still fit into the node
+ * Largest text scale (in steps of 0.2, as produced by `calcTextScale`) at which the title
+ * and the given parts still fit into the node
+ * @param maxScale - Max magnification, see {@link MAX_TEXT_SCALE}
  * @returns 1 if they do not fit at any magnification
  */
-export function maxReadableScale(node: TextFitNode, parts: { technology: boolean; text: boolean }): number {
+export function maxReadableScale(
+  node: TextFitNode,
+  parts: { technology: boolean; text: boolean },
+  maxScale: number = MAX_TEXT_SCALE,
+): number {
   let max = 1
-  for (const scale of SCALES) {
+  for (let step = 6; step <= Math.round(maxScale * 5); step++) {
+    // toFixed removes the floating point noise, same as calcTextScale
+    const scale = Number((step / 5).toFixed(1))
     if (!fitsAtScale(node, scale, parts)) {
       break
     }
@@ -213,6 +223,10 @@ export function maxReadableScale(node: TextFitNode, parts: { technology: boolean
 }
 
 export type TextContentThresholds = {
+  /**
+   * Max text scale at which the titles still fit (the text is not magnified more than this)
+   */
+  title: number
   /**
    * Max text scale for {@link TextContentMode} `full`
    */
@@ -227,30 +241,46 @@ export type TextContentThresholds = {
  * Max text scales for each {@link TextContentMode}, the most constrained node decides for the whole diagram:
  * - if a node can not show its technology and text anymore, all nodes switch to `summary`
  * - if a node can not show its summary anymore, all nodes switch to `title`
+ * - the text is not magnified beyond the scale at which all the titles still fit
  *
  * Small nodes (`xs`, `sm`) do not vote, they hide what does not fit on their own.
+ * Neither do nodes whose title does not fit even without magnification.
  */
-export function calcTextContentThresholds(nodes: Iterable<TextFitNode>): TextContentThresholds {
+export function calcTextContentThresholds(
+  nodes: Iterable<TextFitNode>,
+  maxScale: number = MAX_TEXT_SCALE,
+): TextContentThresholds {
+  let title = Infinity
   let full = Infinity
   let summary = Infinity
   for (const node of nodes) {
     if (node.size === 'xs' || node.size === 'sm') {
       continue
     }
+    if (fitsAtScale(node, 1, { technology: false, text: false })) {
+      title = Math.min(title, maxReadableScale(node, { technology: false, text: false }, maxScale))
+    }
     const technology = !!node.technology
     const text = !!node.text
     if (technology || text) {
-      full = Math.min(full, maxReadableScale(node, { technology, text }))
+      full = Math.min(full, maxReadableScale(node, { technology, text }, maxScale))
     }
     if (text && node.kind === 'summary') {
-      summary = Math.min(summary, maxReadableScale(node, { technology: false, text: true }))
+      summary = Math.min(summary, maxReadableScale(node, { technology: false, text: true }, maxScale))
     }
   }
-  return { full, summary }
+  return { title, full, summary }
 }
 
 /**
- * Text content shown in the nodes for the given text scale
+ * Text scale, limited to the scale at which all the titles still fit (see {@link TextContentThresholds.title})
+ */
+export function cappedTextScale(scale: number, thresholds: TextContentThresholds): number {
+  return Math.max(1, Math.min(scale, thresholds.title))
+}
+
+/**
+ * Text content shown in the nodes for the given (capped) text scale
  */
 export function textContentMode(scale: number, thresholds: TextContentThresholds): TextContentMode {
   switch (true) {

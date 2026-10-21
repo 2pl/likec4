@@ -96,6 +96,7 @@ export { useLikeC4Styles } from './hooks/useLikeC4Styles'
 export { useUpdateEffect } from './hooks/useUpdateEffect'
 
 export type { Types } from './likec4diagram/types'
+export type { ReadableTextLevel } from './utils/textScale'
 
 export { StaticLikeC4Diagram } from './StaticLikeC4Diagram'
 

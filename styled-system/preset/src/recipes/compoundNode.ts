@@ -110,14 +110,15 @@ export const compoundNode = defineRecipe({
       minHeight: '28px',
       color: compoundColor.ref,
       // Magnified, when the diagram is zoomed out, so the title stays readable.
-      // Limited, otherwise the title overlaps nested compounds and elements
+      // Limited (more for larger readable text levels, see `--likec4-text-cap`),
+      // otherwise the title overlaps nested compounds and elements
       transform: {
-        _textScaled: `scale(min(var(--likec4-text-scale, 1), 1.8))`,
+        _textScaled: `scale(min(var(--likec4-text-scale, 1), calc(1.8 * var(--likec4-text-cap, 1))))`,
       },
       // Laid out in a narrower box, so after magnifying it does not exceed the compound
       width: {
         base: 'auto',
-        _textScaled: `calc((100% - 40px) / min(var(--likec4-text-scale, 1), 1.8))`,
+        _textScaled: `calc((100% - 40px) / min(var(--likec4-text-scale, 1), calc(1.8 * var(--likec4-text-cap, 1))))`,
       },
       right: {
         base: '30px',

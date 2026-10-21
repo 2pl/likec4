@@ -8,16 +8,19 @@ import { flattenMarkdownOrString } from '@likec4/core/types'
 import { useMemo } from 'react'
 import { useEnabledFeatures } from '../context/DiagramFeatures'
 import { useOptionalLikeC4Model } from '../context/LikeC4ModelContext'
+import { useReadableTextLevel } from '../context/ReadableTextLevel'
 import { useLikeC4Styles } from '../hooks/useLikeC4Styles'
 import { useTextScale } from '../hooks/useXYFlow'
 import {
   type TextContentMode,
   type TextFitNode,
   calcTextContentThresholds,
+  cappedTextScale,
   nodeTextKind,
   nodeTextSources,
   textContentMode,
 } from '../utils/textContent'
+import { READABLE_TEXT_LEVELS } from '../utils/textScale'
 import type { Types } from './types'
 
 function toTextFitNode(styles: LikeC4Styles, model: LikeC4Model<any> | null, node: Types.Node): TextFitNode | null {
@@ -43,15 +46,28 @@ function toTextFitNode(styles: LikeC4Styles, model: LikeC4Model<any> | null, nod
   }
 }
 
+export type TextContent = {
+  /**
+   * Text content shown in all the nodes (see {@link textContentMode}), `full` if the text is not magnified
+   */
+  mode: TextContentMode
+  /**
+   * Max text scale, at which all the titles still fit (see {@link cappedTextScale}), `undefined` if not limited
+   */
+  maxTextScale: number | undefined
+}
+
+const NotMagnified: TextContent = { mode: 'full', maxTextScale: undefined }
+
 /**
- * Text content shown in all the nodes, while the text is magnified (see {@link textContentMode}).
- * Returns `full` if the text is not magnified.
+ * Text content shown in all the nodes, and the limit of the magnification, while the text is magnified
  */
-export function useTextContentMode(nodes: ReadonlyArray<Types.Node>): TextContentMode {
+export function useTextContent(nodes: ReadonlyArray<Types.Node>): TextContent {
   const { enableReadableText } = useEnabledFeatures()
   const styles = useLikeC4Styles()
   const model = useOptionalLikeC4Model()
   const textScale = useTextScale()
+  const maxScale = READABLE_TEXT_LEVELS[useReadableTextLevel()].text.max
   const isScaled = enableReadableText && textScale > 1
   const thresholds = useMemo(
     () => {
@@ -65,9 +81,15 @@ export function useTextContentMode(nodes: ReadonlyArray<Types.Node>): TextConten
           fitNodes.push(fitNode)
         }
       }
-      return calcTextContentThresholds(fitNodes)
+      return calcTextContentThresholds(fitNodes, maxScale)
     },
-    [isScaled, nodes, styles, model],
+    [isScaled, nodes, styles, model, maxScale],
   )
-  return thresholds ? textContentMode(textScale, thresholds) : 'full'
+  if (!thresholds) {
+    return NotMagnified
+  }
+  return {
+    mode: textContentMode(cappedTextScale(textScale, thresholds), thresholds),
+    maxTextScale: Number.isFinite(thresholds.title) ? thresholds.title : undefined,
+  }
 }

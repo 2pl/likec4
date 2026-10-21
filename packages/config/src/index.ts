@@ -13,6 +13,7 @@ export type {
   LikeC4ProjectConfigInput,
   LikeC4ProjectJsonConfig,
   LocateResult,
+  ReadableTextLevel,
   RelationshipBrowserScope,
   WebappConfig,
   WebappExportFormat,
@@ -20,6 +21,7 @@ export type {
 
 export {
   LikeC4ProjectConfigOps,
+  ReadableTextLevelSchema,
   RelationshipBrowserScopeSchema,
   RelationshipsBrowserConfigSchema,
   WebappConfigSchema,
