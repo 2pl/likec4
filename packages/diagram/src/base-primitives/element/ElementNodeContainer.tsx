@@ -99,7 +99,9 @@ export const ElementNodeContainer = forwardRef<HTMLDivElement, ElementNodeContai
       initial={false}
       {...selectable && {
         animate: isHovered ? { scale: hoverScale } : variant,
-        whileTap: 'tap',
+        // Keep the enlarged scale while pressed: shrinking to the tap scale would move
+        // the action buttons from under the pointer, and the click would be lost
+        whileTap: hoverScale > variants.hovered.scale ? { scale: hoverScale } : 'tap',
       }}
       data-likec4-hovered={isHovered}
       data-likec4-color={data.color}
