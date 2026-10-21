@@ -141,6 +141,26 @@ describe('ProjectConfig schema', () => {
         ).toThrow()
       })
 
+      it('should default readableText to true', ({ expect }) => {
+        const result = validateConfig({
+          name: 'test',
+          webapp: {},
+        })
+
+        expect(result.webapp?.readableText).toBe(true)
+      })
+
+      it('should accept readableText disabled', ({ expect }) => {
+        const result = validateConfig({
+          name: 'test',
+          webapp: {
+            readableText: false,
+          },
+        })
+
+        expect(result.webapp?.readableText).toBe(false)
+      })
+
       it('should enable every export format when exportFormats is omitted', ({ expect }) => {
         const result = validateConfig({
           name: 'test',

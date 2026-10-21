@@ -29,6 +29,10 @@ const FeatureNames = [
    */
   'Vscode',
   'ElementTags',
+  /**
+   * Magnify the text when the diagram is zoomed out, to keep it readable
+   */
+  'ReadableText',
 ] as const
 export type FeatureName = typeof FeatureNames[number]
 
@@ -66,6 +70,7 @@ export const DefaultFeatures: EnabledFeatures = {
   enableVscode: false,
   enableElementTags: false,
   enableNotes: false,
+  enableReadableText: false,
 }
 const DiagramFeaturesContext = createContext<EnabledFeatures>(DefaultFeatures)
 

@@ -91,6 +91,7 @@ export function LikeC4Diagram<A extends Any = Any>({
   dynamicViewVariant,
   enableSearch = false,
   enableNotes = true,
+  readableText = true,
   initialWidth,
   initialHeight,
   reduceGraphics = 'auto',
@@ -189,6 +190,7 @@ export function LikeC4Diagram<A extends Any = Any>({
                 enableElementTags: enableElementTags && hasLikeC4Model,
                 enableCompareWithLatest: enableCompareWithLatest,
                 enableNotes,
+                enableReadableText: readableText,
               }}
             >
               <DiagramEventHandlers

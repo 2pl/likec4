@@ -279,6 +279,24 @@ The allowed values are `global` and `view`. The default is `view`.
 A saved user preference takes precedence over `defaultScope`.
 The `relationshipsScope` URL parameter takes precedence over both the saved preference and `defaultScope`.
 
+## Readable text when zoomed out
+
+When a large diagram is zoomed out to fit the viewport, element titles and relationship labels are magnified so they stay readable instead of shrinking with the diagram.
+
+This is enabled by default. To keep the text at its normal size, disable it:
+
+```jsonc
+{
+  "name": "project-name",
+  "webapp": {
+    "readableText": false
+  }
+}
+```
+
+Users can also switch it on or off with the toggle in the view header.
+Their choice is saved per project and takes precedence over `readableText`.
+
 ## Image Aliases
 
 When using local images in your LikeC4 model, you can create aliases for the folder your images are in to make them more readable and the files more transportable.

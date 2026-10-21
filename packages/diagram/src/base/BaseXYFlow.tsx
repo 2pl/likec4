@@ -16,6 +16,7 @@ import {
 } from '@xyflow/react'
 import { type KeyboardEvent, useMemo } from 'react'
 import type { SetRequired, Simplify } from 'type-fest'
+import { useEnabledFeatures } from '../context/DiagramFeatures'
 import { useCallbackRef } from '../hooks/useCallbackRef'
 import { useUpdateEffect } from '../hooks/useUpdateEffect'
 import { useIsZoomTooSmall, useLabelScale, useTextScale, useXYFlow, useXYStoreApi } from '../hooks/useXYFlow'
@@ -157,7 +158,8 @@ export function BaseXYFlow<
   const isZoomTooSmall = useIsZoomTooSmall()
   const textScale = useTextScale()
   const labelScale = useLabelScale()
-  const scaleProps = textScaleProps(textScale, labelScale)
+  const { enableReadableText } = useEnabledFeatures()
+  const scaleProps = enableReadableText ? textScaleProps(textScale, labelScale) : null
   const style = scaleProps ? { ...props.style, ...scaleProps.style } : props.style
   const xyflow = useXYFlow()
   const xystore = useXYStoreApi()

@@ -83,6 +83,15 @@ export const WebappConfigSchema = z
         ].join('\n'),
       }),
     relationshipsBrowser: RelationshipsBrowserConfigSchema.optional(),
+    readableText: z.boolean()
+      .default(true)
+      .meta({
+        description: [
+          'Magnify element titles and relationship labels when the diagram is zoomed out',
+          '(e.g. to fit a large view), so the text stays readable instead of shrinking.',
+          'Enabled by default; set to false to keep the text at its normal size.',
+        ].join('\n'),
+      }),
   })
   .meta({
     id: 'WebappConfig',
