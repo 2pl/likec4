@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 
-import { type ReadableTextLevel, READABLE_TEXT_LEVELS } from './textScale'
+import { type ReadableTextLevel, calcLabelScale, calcLevelTextScale, READABLE_TEXT_LEVELS } from './textScale'
 
 /**
  * Screen-space font size (px) below which hovered text is considered unreadable.
@@ -34,6 +34,27 @@ export function readableHoverThresholdPx(
   readableText: ReadableTextLevel | false,
 ): number {
   return fontPx * READABLE_TEXT_LEVELS[readableHoverLevel(readableText)][kind].readable
+}
+
+/**
+ * Upper bound of the hover scale for a given zoom and readable text level.
+ *
+ * Hover scales the whole element, while readable text magnifies the text inside it.
+ * Without readable text, reaching the same text size would enlarge the element much more
+ * than with readable text "normal". So when readable text is disabled, the hover scale is limited
+ * to the one with "normal" (title-fit limits ignored, so it never exceeds it).
+ */
+export function readableHoverMaxScale(
+  zoom: number,
+  kind: 'text' | 'label',
+  readableText: ReadableTextLevel | false,
+): number {
+  if (readableText !== false || !(zoom > 0)) {
+    return ReadableHoverMaxScale
+  }
+  const textScale = kind === 'text' ? calcLevelTextScale(zoom, 'normal') : calcLabelScale(zoom, 'normal')
+  const target = READABLE_TEXT_LEVELS[readableHoverLevel('normal')][kind].readable
+  return Math.min(ReadableHoverMaxScale, target / (zoom * textScale))
 }
 
 /**

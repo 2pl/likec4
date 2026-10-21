@@ -5,7 +5,11 @@
 import { type RefObject, useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { useEnabledFeatures } from '../context/DiagramFeatures'
 import { useReadableTextLevel } from '../context/ReadableTextLevel'
-import { computeReadableHoverScale, readableHoverThresholdPx } from '../utils/readable-hover-scale'
+import {
+  computeReadableHoverScale,
+  readableHoverMaxScale,
+  readableHoverThresholdPx,
+} from '../utils/readable-hover-scale'
 import { useXYStore } from './useXYFlow'
 
 export type UseReadableHoverScaleOptions = {
@@ -69,6 +73,7 @@ export function useReadableHoverScale(
       onScreenFontPx,
       baselineScale,
       readableHoverThresholdPx(fontPx, kind, readableText),
+      readableHoverMaxScale(zoom, kind, readableText),
     )
     appliedScaleRef.current = next
     setScale(next)

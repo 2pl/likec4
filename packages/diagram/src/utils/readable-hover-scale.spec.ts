@@ -8,9 +8,10 @@ import {
   ReadableHoverFontThresholdPx,
   readableHoverLevel,
   ReadableHoverMaxScale,
+  readableHoverMaxScale,
   readableHoverThresholdPx,
 } from './readable-hover-scale'
-import { READABLE_TEXT_LEVELS } from './textScale'
+import { calcLevelTextScale, READABLE_TEXT_LEVELS } from './textScale'
 
 describe('readableHoverLevel', () => {
   it('enlarges to the level above the readable text level', () => {
@@ -21,6 +22,40 @@ describe('readableHoverLevel', () => {
 
   it('keeps xlarge as the largest level', () => {
     expect(readableHoverLevel('xlarge')).toBe('xlarge')
+  })
+})
+
+describe('readableHoverMaxScale', () => {
+  it('does not limit hover when readable text is enabled', () => {
+    expect(readableHoverMaxScale(0.3, 'text', 'normal')).toBe(ReadableHoverMaxScale)
+    expect(readableHoverMaxScale(0.3, 'label', 'xlarge')).toBe(ReadableHoverMaxScale)
+  })
+
+  it('limits hover without readable text to the hover scale with readable text "normal"', () => {
+    // zoom 0.36: "normal" magnifies titles x2 (0.72 on screen), hover to "large" (1.0) needs x1.39
+    expect(readableHoverMaxScale(0.36, 'text', false)).toBeCloseTo(1 / 0.72, 5)
+  })
+
+  it('never makes the hovered element larger than with readable text "normal"', () => {
+    const fontPx = 19.2
+    for (const zoom of [0.1, 0.2, 0.36, 0.5]) {
+      const withNormal = computeReadableHoverScale(
+        fontPx * zoom * calcLevelTextScale(zoom, 'normal'),
+        1.05,
+        readableHoverThresholdPx(fontPx, 'text', 'normal'),
+      )
+      const withoutReadableText = computeReadableHoverScale(
+        fontPx * zoom,
+        1.05,
+        readableHoverThresholdPx(fontPx, 'text', false),
+        readableHoverMaxScale(zoom, 'text', false),
+      )
+      expect(withoutReadableText).toBeLessThanOrEqual(withNormal + 1e-9)
+    }
+  })
+
+  it('keeps the baseline bump when the text is readable', () => {
+    expect(computeReadableHoverScale(30, 1.05, 19.2, readableHoverMaxScale(1, 'text', false))).toBe(1.05)
   })
 })
 
