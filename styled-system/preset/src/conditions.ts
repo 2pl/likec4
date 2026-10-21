@@ -55,6 +55,12 @@ export const conditions = {
     // Relationship labels are magnified, because the diagram is zoomed out
     labelScaled: ':where([data-likec4-label-scaled="true"]) &',
 
+    // Magnified nodes show only the title and the summary (descriptions and technology are hidden)
+    textContentSummary: ':where([data-likec4-text-content="summary"]) &',
+
+    // Magnified nodes show only the title
+    textContentTitle: ':where([data-likec4-text-content="title"]) &',
+
     compoundTransparent: ':where([data-compound-transparent]) &',
 
     edgeActive: ':where([data-likec4-edge-active="true"]) &',

@@ -35,6 +35,7 @@ import { deriveToggledFeatures } from './state/machine.setup'
 import { viewBounds } from './state/utils'
 import type { Types } from './types'
 import { useLayoutConstraints } from './useLayoutConstraints'
+import { useTextContentMode } from './useTextContentMode'
 import { useGraphForceSimulation } from './xyflow-graph/useGraphForceSimulation'
 
 const edgeTypes = {
@@ -176,6 +177,7 @@ export function LikeC4DiagramXYFlow({
     enableControls,
     ...props
   } = useDiagramSelector(selectXYProps)
+  const textContent = useTextContentMode(nodes)
   const isEditorBusy = useEditorActorStateHasTag('busy')
   nodesDraggable = resolveInteractionEnabled(nodesDraggable, nodesDraggableOverride, isEditorBusy)
   nodesSelectable = resolveInteractionEnabled(nodesSelectable, nodesSelectableOverride, isEditorBusy)
@@ -247,6 +249,8 @@ export function LikeC4DiagramXYFlow({
       nodes={nodes}
       edges={edges}
       className={cx(initialized ? 'initialized' : 'not-initialized')}
+      // Text content shown in the nodes, when the text is magnified (see `useTextContentMode`)
+      data-likec4-text-content={textContent !== 'full' ? textContent : undefined}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
       onNodesChange={useCallbackRef((changes) => {

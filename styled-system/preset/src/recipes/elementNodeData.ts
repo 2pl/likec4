@@ -263,6 +263,13 @@ export const elementNodeData = defineRecipe({
       display: {
         _shapeSizeXs: 'none!',
         _smallZoom: 'none!',
+        _textContentTitle: 'none!',
+      },
+      // Summary is kept, description (shown when the element has no summary) is hidden
+      '&[data-likec4-text-kind="description"]': {
+        _textContentSummary: {
+          display: 'none!',
+        },
       },
 
       '& a': {
@@ -293,6 +300,8 @@ export const elementNodeData = defineRecipe({
         _shapeSizeXs: 'none!',
         _shapeSizeSm: 'none!',
         _smallZoom: 'none!',
+        _textContentSummary: 'none!',
+        _textContentTitle: 'none!',
       },
     },
   }),

@@ -5,7 +5,7 @@
 //
 // Portions of this file have been modified by NVIDIA CORPORATION & AFFILIATES.
 
-import type { ComputedNodeStyle, ElementShape, MarkdownOrString, NodeId } from '@likec4/core'
+import type { ComputedNodeStyle, DeploymentFqn, ElementShape, Fqn, MarkdownOrString, NodeId } from '@likec4/core'
 import type { ColorLiteral, LikeC4Styles } from '@likec4/core/styles'
 import { type Color, RichText } from '@likec4/core/types'
 import { cx } from '@likec4/styles/css'
@@ -21,6 +21,7 @@ import { isTruthy } from 'remeda'
 import type { MergeExclusive } from 'type-fest'
 import { IconRenderer } from '../../context/IconRenderer'
 import { useLikeC4Styles } from '../../hooks/useLikeC4Styles'
+import { useNodeTextKind } from '../../hooks/useNodeTextKind'
 import { Markdown } from '../Markdown'
 
 type RequiredData = {
@@ -34,6 +35,11 @@ type RequiredData = {
   icon?: string | null
   width?: number | undefined
   height?: number | undefined
+  /**
+   * Model references, to resolve whether the description is a summary
+   */
+  modelFqn?: Fqn | null | undefined
+  deploymentFqn?: DeploymentFqn | null | undefined
 }
 
 export type ElementDataProps = {
@@ -197,9 +203,11 @@ const Description = forwardRef<
   HTMLDivElement,
   SlotProps
 >((
-  { data: { description, style }, className, ...props },
+  { data, className, ...props },
   ref,
 ) => {
+  const { description, style } = data
+  const kind = useNodeTextKind(data)
   if (!description) {
     return null
   }
@@ -212,6 +220,8 @@ const Description = forwardRef<
         'likec4-element-description',
       )}
       data-likec4-node-description=""
+      // Descriptions are hidden before summaries, when the text is magnified (see `textContent` conditions)
+      data-likec4-text-kind={kind ?? undefined}
       value={desc}
       uselikec4palette
       hideIfEmpty

@@ -283,6 +283,14 @@ The `relationshipsScope` URL parameter takes precedence over both the saved pref
 
 When a large diagram is zoomed out to fit the viewport, element titles and relationship labels are magnified so they stay readable instead of shrinking with the diagram.
 
+The text shown in the elements is chosen for the whole diagram, so that all elements stay consistent:
+
+- while everything fits, elements show their technology and summary (or description, if there is no summary)
+- once a description or a technology no longer fits in an element, all elements show only their title and summary
+- once a summary no longer fits, all elements show only their title
+
+Small elements (sizes `xs` and `sm`) do not take part in this decision, they hide what does not fit on their own.
+
 This is enabled by default. To keep the text at its normal size, disable it:
 
 ```jsonc
