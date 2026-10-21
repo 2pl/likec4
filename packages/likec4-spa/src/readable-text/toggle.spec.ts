@@ -4,7 +4,6 @@
 
 import { describe, expect, it } from 'vitest'
 import {
-  nextReadableText,
   parseReadableTextOverride,
   readableTextStorageKey,
   readReadableTextOverride,
@@ -33,15 +32,6 @@ describe('resolveReadableText', () => {
   it('falls back to the configured default when no override exists', () => {
     expect(resolveReadableText({ configuredDefault: 'large' })).toBe('large')
     expect(resolveReadableText({ configuredDefault: false })).toBe(false)
-  })
-})
-
-describe('nextReadableText', () => {
-  it('cycles off, normal, large, extra large, and back to off', () => {
-    expect(nextReadableText(false)).toBe('normal')
-    expect(nextReadableText('normal')).toBe('large')
-    expect(nextReadableText('large')).toBe('xlarge')
-    expect(nextReadableText('xlarge')).toBe(false)
   })
 })
 

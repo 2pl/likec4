@@ -2,16 +2,17 @@
 //
 // Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 
-import { ActionIcon, Indicator, Tooltip } from '@mantine/core'
-import { IconTextSize } from '@tabler/icons-react'
+import { ActionIcon, Indicator, Menu, MenuDropdown, MenuItem, MenuLabel, MenuTarget, Tooltip } from '@mantine/core'
+import { IconCheck, IconTextSize } from '@tabler/icons-react'
+import { useState } from 'react'
 import { useCurrentProject } from '../hooks'
-import { type ReadableText, nextReadableText, useReadableText } from './toggle'
+import { type ReadableText, ReadableTextOptions, useReadableText } from './toggle'
 
 const labels = {
-  off: 'Readable text when zoomed out: off',
-  normal: 'Readable text when zoomed out: normal',
-  large: 'Readable text when zoomed out: large',
-  xlarge: 'Readable text when zoomed out: extra large',
+  off: 'Off',
+  normal: 'Medium',
+  large: 'Large',
+  xlarge: 'Extra large',
 } as const
 
 const badges = {
@@ -24,29 +25,44 @@ function label(value: ReadableText) {
 }
 
 /**
- * Header toggle for the "readable text when zoomed out" diagram feature (see `useReadableText`).
- * Each click switches to the next level: off, normal, large, extra large.
+ * Header menu for the "readable text when zoomed out" diagram feature (see `useReadableText`),
+ * shown as "Text size": off, medium, large, extra large.
  */
 export function ReadableTextToggle() {
   const project = useCurrentProject()
   const [readableText, setReadableText] = useReadableText(project)
-  const next = nextReadableText(readableText)
+  const [opened, setOpened] = useState(false)
   const badge = readableText === 'large' || readableText === 'xlarge' ? badges[readableText] : null
 
   return (
-    <Tooltip label={`${label(readableText)} (click: ${label(next).split(': ')[1]})`}>
-      <Indicator label={badge} size={14} disabled={!badge} offset={4} color="orange">
-        <ActionIcon
-          size={'md'}
-          variant={readableText ? 'filled' : 'subtle'}
-          color={readableText ? 'blue' : 'gray'}
-          onClick={() => setReadableText(next)}
-          aria-label="Toggle readable text when zoomed out"
-          data-readable-text={readableText || 'off'}
-        >
-          <IconTextSize stroke={1.5} />
-        </ActionIcon>
-      </Indicator>
-    </Tooltip>
+    <Menu shadow="md" width={200} position="bottom-end" opened={opened} onChange={setOpened}>
+      <Tooltip label={`Text size: ${label(readableText)}`} disabled={opened}>
+        <Indicator label={badge} size={14} disabled={!badge} offset={4} color="orange">
+          <MenuTarget>
+            <ActionIcon
+              size={'md'}
+              variant={readableText ? 'filled' : 'subtle'}
+              color={readableText ? 'blue' : 'gray'}
+              aria-label="Text size"
+              data-readable-text={readableText || 'off'}
+            >
+              <IconTextSize stroke={1.5} />
+            </ActionIcon>
+          </MenuTarget>
+        </Indicator>
+      </Tooltip>
+      <MenuDropdown>
+        <MenuLabel>Text size when zoomed out</MenuLabel>
+        {ReadableTextOptions.map(option => (
+          <MenuItem
+            key={label(option)}
+            onClick={() => setReadableText(option)}
+            rightSection={option === readableText ? <IconCheck size={14} /> : null}
+          >
+            {label(option)}
+          </MenuItem>
+        ))}
+      </MenuDropdown>
+    </Menu>
   )
 }

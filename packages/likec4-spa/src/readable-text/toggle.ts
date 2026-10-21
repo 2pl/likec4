@@ -16,17 +16,9 @@ type ReadableTextStorage = Pick<Storage, 'getItem' | 'setItem'>
 export type ReadableText = ReadableTextLevel | false
 
 /**
- * Order of the header toggle: off, then larger and larger text
+ * Options of the header "Text size" menu: off, then larger and larger text
  */
-const ReadableTextCycle: ReadonlyArray<ReadableText> = [false, 'normal', 'large', 'xlarge']
-
-/**
- * Next value of the header toggle (wraps around to off)
- */
-export function nextReadableText(value: ReadableText): ReadableText {
-  const index = ReadableTextCycle.indexOf(value)
-  return ReadableTextCycle[(index + 1) % ReadableTextCycle.length] ?? false
-}
+export const ReadableTextOptions: ReadonlyArray<ReadableText> = [false, 'normal', 'large', 'xlarge']
 
 export function readableTextStorageKey(projectId: string) {
   return `likec4.readableText:${projectId}`
