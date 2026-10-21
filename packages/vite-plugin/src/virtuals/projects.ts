@@ -67,7 +67,7 @@ export const projectsModule = {
         path: p.path,
         landingPage: p.config.landingPage,
         relationshipBrowserDefaultScope: p.config.webapp?.relationshipsBrowser?.defaultScope ?? 'view',
-        readableHover: p.config.webapp?.readableHover ?? false,
+        readableHover: p.config.webapp?.readableHover ?? true,
         exportFormats: effectiveWebappExportFormats(p.config),
       }))),
       moduleType: 'js',

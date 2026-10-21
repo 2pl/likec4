@@ -278,7 +278,7 @@ export interface LikeC4DiagramProperties<A extends Any = Unknown> {
    * main text readable on screen, instead of the fixed small bump. Has no effect on
    * compound (group) nodes.
    *
-   * @default false
+   * @default true
    */
   readableHover?: boolean | undefined
 

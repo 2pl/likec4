@@ -91,7 +91,7 @@ export function LikeC4Diagram<A extends Any = Any>({
   dynamicViewVariant,
   enableSearch = false,
   enableNotes = true,
-  readableHover = false,
+  readableHover = true,
   initialWidth,
   initialHeight,
   reduceGraphics = 'auto',

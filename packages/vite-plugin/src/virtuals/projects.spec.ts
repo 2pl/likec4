@@ -24,7 +24,7 @@ describe('projects virtual module capabilities', () => {
               relationshipsBrowser: {
                 defaultScope: 'global',
               },
-              readableHover: true,
+              readableHover: false,
             },
           },
         },
