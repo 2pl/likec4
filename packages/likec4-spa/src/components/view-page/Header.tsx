@@ -26,6 +26,7 @@ import { AnimatePresence } from 'motion/react'
 import { memo, useCallback, useState } from 'react'
 import { enabledWebappExportFormats } from '../../export-formats'
 import { useCurrentProject, useCurrentViewId } from '../../hooks'
+import { ReadableHoverToggle } from '../../readable-hover/ReadableHoverToggle'
 import { ColorSchemeToggle } from '../ColorSchemeToggle'
 import { NavigationPanel } from '../NavigationPanel'
 import { SelectProject } from './SelectProject'
@@ -73,6 +74,7 @@ export const Header = memo(() => {
                       </Button>
                     )}
                     <ExportButton />
+                    <ReadableHoverToggle />
                   </>
                 )
                 : (

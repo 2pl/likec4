@@ -83,6 +83,15 @@ export const WebappConfigSchema = z
         ].join('\n'),
       }),
     relationshipsBrowser: RelationshipsBrowserConfigSchema.optional(),
+    readableHover: z.boolean()
+      .default(false)
+      .meta({
+        description: [
+          'Scale the hover enlargement of a leaf element/edge label just enough to keep',
+          'its main text readable when the diagram is zoomed out, instead of the fixed',
+          'small bump. Has no effect on compound (group) nodes.',
+        ].join('\n'),
+      }),
   })
   .meta({
     id: 'WebappConfig',

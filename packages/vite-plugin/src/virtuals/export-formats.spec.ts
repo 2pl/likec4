@@ -15,11 +15,13 @@ describe('webapp export format capabilities', () => {
   })
 
   it('keeps disabled exports disabled', ({ expect }) => {
-    expect(effectiveWebappExportFormats({ webapp: { exportFormats: [] } })).toEqual([])
+    expect(effectiveWebappExportFormats({ webapp: { exportFormats: [], readableHover: false } })).toEqual([])
   })
 
   it('normalizes configured formats to the fixed LikeC4 menu order', ({ expect }) => {
-    expect(effectiveWebappExportFormats({ webapp: { exportFormats: ['drawio', 'jpg', 'dot'] } })).toEqual([
+    expect(
+      effectiveWebappExportFormats({ webapp: { exportFormats: ['drawio', 'jpg', 'dot'], readableHover: false } }),
+    ).toEqual([
       'jpg',
       'dot',
       'drawio',
@@ -27,7 +29,9 @@ describe('webapp export format capabilities', () => {
   })
 
   it('checks whether a project has an export format enabled', ({ expect }) => {
-    const config: Pick<LikeC4ProjectConfig, 'webapp'> = { webapp: { exportFormats: ['png', 'drawio'] } }
+    const config: Pick<LikeC4ProjectConfig, 'webapp'> = {
+      webapp: { exportFormats: ['png', 'drawio'], readableHover: false },
+    }
 
     expect(isWebappExportFormatEnabled(config, 'png')).toBe(true)
     expect(isWebappExportFormatEnabled(config, 'dot')).toBe(false)

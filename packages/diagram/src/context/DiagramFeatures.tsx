@@ -29,6 +29,10 @@ const FeatureNames = [
    */
   'Vscode',
   'ElementTags',
+  /**
+   * Scale hover enlargement to keep element/edge-label text readable when zoomed out
+   */
+  'ReadableHover',
 ] as const
 export type FeatureName = typeof FeatureNames[number]
 
@@ -66,6 +70,7 @@ export const DefaultFeatures: EnabledFeatures = {
   enableVscode: false,
   enableElementTags: false,
   enableNotes: false,
+  enableReadableHover: false,
 }
 const DiagramFeaturesContext = createContext<EnabledFeatures>(DefaultFeatures)
 

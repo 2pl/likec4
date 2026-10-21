@@ -1,10 +1,13 @@
 import { type Color, type ComputedNodeStyle, type ElementShape, ensureSizes } from '@likec4/core/types'
 import { cx } from '@likec4/styles/css'
 import { elementNode } from '@likec4/styles/recipes'
+import { useMergedRef } from '@mantine/hooks'
 import type { MotionNodeLayoutOptions, MotionStyle, Variants } from 'motion/react'
 import * as m from 'motion/react-m'
-import { type PropsWithChildren, forwardRef } from 'react'
+import { type PropsWithChildren, forwardRef, useRef } from 'react'
 import type { BaseNodePropsWithData } from '../../base/types'
+import { useEnabledFeatures } from '../../context/DiagramFeatures'
+import { useReadableHoverScale } from '../../hooks/useReadableHoverScale'
 
 type RequiredData = {
   color: Color
@@ -74,9 +77,18 @@ export const ElementNodeContainer = forwardRef<HTMLDivElement, ElementNodeContai
     textSize,
   } = ensureSizes(data.style ?? {})
 
+  const { enableReadableHover } = useEnabledFeatures()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const hoverScale = useReadableHoverScale(containerRef, {
+    enabled: enableReadableHover,
+    hovered: isHovered,
+    baselineScale: variants.hovered.scale,
+    measureSelector: '[data-likec4-node-title]',
+  })
+
   return (
     <m.div
-      ref={ref}
+      ref={useMergedRef(ref, containerRef)}
       className={cx(
         elementNode(),
         'group',
@@ -85,7 +97,7 @@ export const ElementNodeContainer = forwardRef<HTMLDivElement, ElementNodeContai
       variants={variants}
       initial={false}
       {...selectable && {
-        animate: variant,
+        animate: isHovered ? { scale: hoverScale } : variant,
         whileTap: 'tap',
       }}
       data-likec4-hovered={isHovered}

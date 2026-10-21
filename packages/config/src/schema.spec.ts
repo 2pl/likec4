@@ -153,6 +153,26 @@ describe('ProjectConfig schema', () => {
         ).toThrow()
       })
 
+      it('should default readableHover to false', ({ expect }) => {
+        const result = validateConfig({
+          name: 'test',
+          webapp: {},
+        })
+
+        expect(result.webapp?.readableHover).toBe(false)
+      })
+
+      it('should accept readableHover enabled', ({ expect }) => {
+        const result = validateConfig({
+          name: 'test',
+          webapp: {
+            readableHover: true,
+          },
+        })
+
+        expect(result.webapp?.readableHover).toBe(true)
+      })
+
       it('should enable every export format when exportFormats is omitted', ({ expect }) => {
         const result = validateConfig({
           name: 'test',
