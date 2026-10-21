@@ -160,7 +160,11 @@ export const elementNodeData = defineRecipe({
       display: {
         base: 'flex',
       },
-      alignSelf: 'flex-start',
+      alignSelf: {
+        base: 'flex-start',
+        // Magnified, the root spans the whole node (not just the content), keep the icon next to the content
+        _textScaled: 'center',
+      },
       alignItems: 'center',
       justifyContent: 'center',
       pointerEvents: 'none',
