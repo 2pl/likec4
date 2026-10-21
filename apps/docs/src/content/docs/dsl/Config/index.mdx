@@ -281,8 +281,14 @@ The `relationshipsScope` URL parameter takes precedence over both the saved pref
 
 ## Readable hover
 
-When the diagram is zoomed out, hovering an element or a relationship label enlarges it just enough to keep its text readable.
-When the text is already readable, hover keeps the usual small enlargement. Groups are not affected.
+When the diagram is zoomed out, hovering an element or a relationship label enlarges it, so its text is shown one level larger than [readable text](#readable-text-when-zoomed-out):
+
+| Readable text          | Hovered text is shown at |
+| ---------------------- | ------------------------ |
+| off, normal            | `"large"`                |
+| `"large"`, `"xlarge"`  | `"xlarge"`               |
+
+When the text is already that large, hover keeps the usual small enlargement. Groups are not affected.
 
 This is enabled by default. To keep the fixed hover enlargement, disable it:
 

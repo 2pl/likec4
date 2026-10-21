@@ -35,10 +35,10 @@ export function ReadableTextToggle() {
 
   return (
     <Tooltip label={`${label(readableText)} (click: ${label(next).split(': ')[1]})`}>
-      <Indicator label={badge} size={14} disabled={!badge} offset={4}>
+      <Indicator label={badge} size={14} disabled={!badge} offset={4} color="orange">
         <ActionIcon
           size={'md'}
-          variant={readableText ? 'light' : 'subtle'}
+          variant={readableText ? 'filled' : 'subtle'}
           color={readableText ? 'blue' : 'gray'}
           onClick={() => setReadableText(next)}
           aria-label="Toggle readable text when zoomed out"

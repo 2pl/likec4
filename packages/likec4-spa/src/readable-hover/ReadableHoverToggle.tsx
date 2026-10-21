@@ -18,7 +18,7 @@ export function ReadableHoverToggle() {
     <Tooltip label={readableHover ? 'Readable hover: on' : 'Readable hover: off'}>
       <ActionIcon
         size={'md'}
-        variant={readableHover ? 'light' : 'subtle'}
+        variant={readableHover ? 'filled' : 'subtle'}
         color={readableHover ? 'blue' : 'gray'}
         onClick={() => setReadableHover(!readableHover)}
         aria-label="Toggle readable hover"

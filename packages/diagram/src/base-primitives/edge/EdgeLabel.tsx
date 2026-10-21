@@ -63,6 +63,7 @@ export const EdgeLabel = forwardRef<HTMLDivElement, EdgeLabelProps>((
     hovered: isScaledUp,
     baselineScale: BaselineHoverScale,
     measureSelector: '.likec4-edge-label__text, .likec4-edge-label__technology',
+    kind: 'label',
   })
 
   return (

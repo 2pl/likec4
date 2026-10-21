@@ -84,6 +84,7 @@ export const ElementNodeContainer = forwardRef<HTMLDivElement, ElementNodeContai
     hovered: isHovered,
     baselineScale: variants.hovered.scale,
     measureSelector: '[data-likec4-node-title]',
+    kind: 'text',
   })
 
   return (
