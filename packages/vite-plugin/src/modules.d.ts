@@ -6,7 +6,7 @@
 // Portions of this file have been modified by NVIDIA CORPORATION & AFFILIATES.
 
 declare module 'likec4:projects' {
-  import type { RelationshipBrowserScope, WebappExportFormat } from 'likec4/config'
+  import type { ReadableTextLevel, RelationshipBrowserScope, WebappExportFormat } from 'likec4/config'
   import type { ProjectId } from 'likec4/model'
   type LandingPageConfig =
     | { redirect: true }
@@ -19,6 +19,10 @@ declare module 'likec4:projects' {
     landingPage?: LandingPageConfig
     relationshipBrowserDefaultScope: RelationshipBrowserScope
     readableHover: boolean
+    /**
+     * Readable text level, `false` if disabled
+     */
+    readableText: ReadableTextLevel | false
     exportFormats: readonly WebappExportFormat[]
   }
   export const isSingleProject: boolean

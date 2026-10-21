@@ -24,6 +24,7 @@ export type StaticLikeC4DiagramProps<A extends Any> = Pick<
   | 'relationshipBrowserScope'
   | 'enableElementTags'
   | 'readableHover'
+  | 'readableText'
   | 'reduceGraphics'
   | 'initialWidth'
   | 'initialHeight'

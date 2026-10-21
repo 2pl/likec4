@@ -15,6 +15,7 @@ import { NotFound } from '../components/NotFound'
 import { useLikeC4ModelAtom } from '../context/safeCtx'
 import { useCurrentProject, useCurrentView } from '../hooks'
 import { useReadableHover } from '../readable-hover/toggle'
+import { useReadableText } from '../readable-text/toggle'
 import { useRelationshipBrowserScope } from '../relationship-browser/scope'
 import { FocusElementFromUrl, ListenForDiagramStateChanges, OpenRelationshipBrowserFromUrl } from './ViewReact'
 
@@ -24,6 +25,7 @@ export function ViewEditor() {
   const [view, setLayoutType] = useCurrentView()
   const [relationshipBrowserScope, setRelationshipBrowserScope] = useRelationshipBrowserScope(project)
   const [readableHover] = useReadableHover(project)
+  const [readableText] = useReadableText(project)
   const $likec4model = useLikeC4ModelAtom()
   const { dynamic } = useSearch({ strict: false })
 
@@ -94,6 +96,7 @@ export function ViewEditor() {
         enableElementTags
         enableCompareWithLatest
         readableHover={readableHover}
+        readableText={readableText}
         dynamicViewVariant={dynamic}
         onNavigateTo={onNavigateTo}
         onLayoutTypeChange={setLayoutType}

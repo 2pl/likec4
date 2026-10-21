@@ -20,6 +20,7 @@ import type { CamelCasedProperties, SetRequired } from 'type-fest'
 import type { DiagramApi } from './hooks/useDiagram'
 import type { XYFlowInstance } from './hooks/useXYFlow'
 import type { Types } from './likec4diagram/types'
+import type { ReadableTextLevel } from './utils/textScale'
 
 type Any = t.aux.Any
 type Unknown = t.aux.UnknownLayouted
@@ -281,6 +282,19 @@ export interface LikeC4DiagramProperties<A extends Any = Unknown> {
    * @default true
    */
   readableHover?: boolean | undefined
+
+  /**
+   * Magnify element titles and relationship labels when the diagram is zoomed out
+   * (e.g. to fit a large view), so the text stays readable instead of shrinking.
+   *
+   * - `true` or `'normal'`: text is kept at least at 70% of its size
+   * - `'large'`: text is kept at least at its normal size (e.g. for presenting)
+   * - `'xlarge'`: text is kept larger than its normal size (e.g. for a large meeting room)
+   * - `false`: text shrinks with the diagram
+   *
+   * @default true
+   */
+  readableText?: boolean | ReadableTextLevel | undefined
 
   /**
    * Improve performance by hiding certain elements and reducing visual effects (disable mix-blend, shadows, animations)

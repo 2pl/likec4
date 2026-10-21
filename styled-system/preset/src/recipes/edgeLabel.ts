@@ -35,7 +35,7 @@ export const edgeLabel = defineRecipe({
       // Uses `scale` (not `transform`), as the hover animation owns `transform`.
       // Limited, otherwise labels overlap each other and the nodes
       scale: {
-        _labelScaled: `min(var(--likec4-label-scale, 1), 2.2)`,
+        _labelScaled: `min(var(--likec4-label-scale, 1), calc(2.2 * var(--likec4-text-cap, 1)))`,
       },
       transformOrigin: {
         _labelScaled: 'var(--likec4-edge-label-origin, center)',
@@ -116,7 +116,7 @@ export const edgeLabel = defineRecipe({
         root: {
           // Step labels sit in their own column, there is more room to grow
           scale: {
-            _labelScaled: `min(var(--likec4-label-scale, 1), 3)`,
+            _labelScaled: `min(var(--likec4-label-scale, 1), calc(3 * var(--likec4-text-cap, 1)))`,
           },
           flexDirection: 'row',
           gap: '1',

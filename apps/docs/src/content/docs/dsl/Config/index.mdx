@@ -298,6 +298,42 @@ This is enabled by default. To keep the fixed hover enlargement, disable it:
 Users can also switch it on or off with the toggle in the view header.
 Their choice is saved per project and takes precedence over `readableHover`.
 
+## Readable text when zoomed out
+
+When a large diagram is zoomed out to fit the viewport, element titles and relationship labels are magnified so they stay readable instead of shrinking with the diagram.
+
+The text shown in the elements is chosen for the whole diagram, so that all elements stay consistent:
+
+- while everything fits, elements show their technology and summary (or description, if there is no summary)
+- once a description or a technology no longer fits in an element, all elements show only their title and summary
+- once a summary no longer fits, all elements show only their title
+
+Titles are never magnified beyond the size at which they still fit whole in their elements.
+Small elements (sizes `xs` and `sm`) do not take part in these decisions, they hide what does not fit on their own.
+
+How large the text is kept depends on the level (as long as the titles still fit):
+
+| Value                | Text is kept at least at |
+| -------------------- | ------------------------ |
+| `true` or `"normal"` | 70% of its normal size   |
+| `"large"`            | its normal size          |
+| `"xlarge"`           | 140% of its normal size  |
+| `false`              | disabled                 |
+
+The default is `true`. For presentations, for example on a screen in a meeting room, use a larger level:
+
+```jsonc
+{
+  "name": "project-name",
+  "webapp": {
+    "readableText": "xlarge"
+  }
+}
+```
+
+Users can also switch levels with the button in the view header, each click selects the next level: off, normal, large, extra large.
+Their choice is saved per project and takes precedence over `readableText`.
+
 ## Image Aliases
 
 When using local images in your LikeC4 model, you can create aliases for the folder your images are in to make them more readable and the files more transportable.

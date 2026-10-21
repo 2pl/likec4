@@ -54,6 +54,7 @@ export function EmbedPage() {
         enableRelationshipBrowser
         relationshipBrowserScope={relationshipBrowserScope}
         readableHover={project.readableHover}
+        readableText={project.readableText}
         initialWidth={bounds.width}
         initialHeight={bounds.height} />
     </div>

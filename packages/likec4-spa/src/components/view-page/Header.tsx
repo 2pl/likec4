@@ -27,6 +27,7 @@ import { memo, useCallback, useState } from 'react'
 import { enabledWebappExportFormats } from '../../export-formats'
 import { useCurrentProject, useCurrentViewId } from '../../hooks'
 import { ReadableHoverToggle } from '../../readable-hover/ReadableHoverToggle'
+import { ReadableTextToggle } from '../../readable-text/ReadableTextToggle'
 import { ColorSchemeToggle } from '../ColorSchemeToggle'
 import { NavigationPanel } from '../NavigationPanel'
 import { SelectProject } from './SelectProject'
@@ -75,6 +76,7 @@ export const Header = memo(() => {
                     )}
                     <ExportButton />
                     <ReadableHoverToggle />
+                    <ReadableTextToggle />
                   </>
                 )
                 : (

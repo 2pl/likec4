@@ -160,7 +160,11 @@ export const elementNodeData = defineRecipe({
       display: {
         base: 'flex',
       },
-      alignSelf: 'flex-start',
+      alignSelf: {
+        base: 'flex-start',
+        // Magnified, the root spans the whole node (not just the content), keep the icon next to the content
+        _textScaled: 'center',
+      },
       alignItems: 'center',
       justifyContent: 'center',
       pointerEvents: 'none',
@@ -263,6 +267,13 @@ export const elementNodeData = defineRecipe({
       display: {
         _shapeSizeXs: 'none!',
         _smallZoom: 'none!',
+        _textContentTitle: 'none!',
+      },
+      // Summary is kept, description (shown when the element has no summary) is hidden
+      '&[data-likec4-text-kind="description"]': {
+        _textContentSummary: {
+          display: 'none!',
+        },
       },
 
       '& a': {
@@ -293,6 +304,8 @@ export const elementNodeData = defineRecipe({
         _shapeSizeXs: 'none!',
         _shapeSizeSm: 'none!',
         _smallZoom: 'none!',
+        _textContentSummary: 'none!',
+        _textContentTitle: 'none!',
       },
     },
   }),

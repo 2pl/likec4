@@ -22,6 +22,7 @@ import {
   IconRendererProvider,
 } from './context'
 import { CurrentViewModelProvider } from './context/CurrentViewModelProvider'
+import { ReadableTextLevelProvider } from './context/ReadableTextLevel'
 import { TagStylesProvider } from './context/TagStylesContext'
 import { useOptionalLikeC4Editor } from './editor'
 import { useId } from './hooks/useId'
@@ -92,6 +93,7 @@ export function LikeC4Diagram<A extends Any = Any>({
   enableSearch = false,
   enableNotes = true,
   readableHover = true,
+  readableText = true,
   initialWidth,
   initialHeight,
   reduceGraphics = 'auto',
@@ -191,60 +193,63 @@ export function LikeC4Diagram<A extends Any = Any>({
                 enableCompareWithLatest: enableCompareWithLatest,
                 enableNotes,
                 enableReadableHover: readableHover,
+                enableReadableText: readableText !== false,
               }}
             >
-              <DiagramEventHandlers
-                handlers={{
-                  onCanvasClick,
-                  onCanvasContextMenu,
-                  onCanvasDblClick,
-                  onEdgeClick,
-                  onEdgeContextMenu,
-                  onNavigateTo,
-                  onNodeClick,
-                  onNodeContextMenu,
-                  onOpenSource,
-                  onLogoClick,
-                  onInitialized,
-                  onLayoutTypeChange,
-                  onRelationshipBrowserScopeChange,
-                }}>
-                <LikeC4Styles rootSelector={`#${id}`} />
-                <TagStylesProvider rootSelector={`#${id}`}>
-                  <RootContainer id={id} className={className} reduceGraphics={isReducedGraphicsMode}>
-                    <XYFlowProvider
-                      fitView={initialFitView}
-                      {...initialRef.current}
-                    >
-                      <DiagramActorProvider
-                        id={id}
-                        view={view}
-                        zoomable={zoomable}
-                        pannable={pannable}
-                        fitView={fitView}
-                        initialZoom={initialZoom}
-                        fitViewPadding={fitViewPadding}
-                        nodesDraggable
-                        nodesSelectable={nodesSelectable}
-                        where={where ?? null}
-                        dynamicViewVariant={dynamicViewVariant}
-                        relationshipBrowserScope={relationshipBrowserScope}
+              <ReadableTextLevelProvider value={typeof readableText === 'string' ? readableText : 'normal'}>
+                <DiagramEventHandlers
+                  handlers={{
+                    onCanvasClick,
+                    onCanvasContextMenu,
+                    onCanvasDblClick,
+                    onEdgeClick,
+                    onEdgeContextMenu,
+                    onNavigateTo,
+                    onNodeClick,
+                    onNodeContextMenu,
+                    onOpenSource,
+                    onLogoClick,
+                    onInitialized,
+                    onLayoutTypeChange,
+                    onRelationshipBrowserScopeChange,
+                  }}>
+                  <LikeC4Styles rootSelector={`#${id}`} />
+                  <TagStylesProvider rootSelector={`#${id}`}>
+                    <RootContainer id={id} className={className} reduceGraphics={isReducedGraphicsMode}>
+                      <XYFlowProvider
+                        fitView={initialFitView}
+                        {...initialRef.current}
                       >
-                        <CurrentViewModelProvider>
-                          <LikeC4DiagramXYFlow
-                            background={background}
-                            reactFlowProps={reactFlowProps}
-                            renderNodes={renderNodes}
-                          >
-                            {children}
-                          </LikeC4DiagramXYFlow>
-                          <LikeC4DiagramUI />
-                        </CurrentViewModelProvider>
-                      </DiagramActorProvider>
-                    </XYFlowProvider>
-                  </RootContainer>
-                </TagStylesProvider>
-              </DiagramEventHandlers>
+                        <DiagramActorProvider
+                          id={id}
+                          view={view}
+                          zoomable={zoomable}
+                          pannable={pannable}
+                          fitView={fitView}
+                          initialZoom={initialZoom}
+                          fitViewPadding={fitViewPadding}
+                          nodesDraggable
+                          nodesSelectable={nodesSelectable}
+                          where={where ?? null}
+                          dynamicViewVariant={dynamicViewVariant}
+                          relationshipBrowserScope={relationshipBrowserScope}
+                        >
+                          <CurrentViewModelProvider>
+                            <LikeC4DiagramXYFlow
+                              background={background}
+                              reactFlowProps={reactFlowProps}
+                              renderNodes={renderNodes}
+                            >
+                              {children}
+                            </LikeC4DiagramXYFlow>
+                            <LikeC4DiagramUI />
+                          </CurrentViewModelProvider>
+                        </DiagramActorProvider>
+                      </XYFlowProvider>
+                    </RootContainer>
+                  </TagStylesProvider>
+                </DiagramEventHandlers>
+              </ReadableTextLevelProvider>
             </DiagramFeatures>
           </IconRendererProvider>
         </FramerMotionConfig>

@@ -25,6 +25,7 @@ import { NotFound } from '../components/NotFound'
 import { headerOps } from '../components/view-page/state'
 import { useCurrentProject, useCurrentView } from '../hooks'
 import { useReadableHover } from '../readable-hover/toggle'
+import { useReadableText } from '../readable-text/toggle'
 import { useRelationshipBrowserScope } from '../relationship-browser/scope'
 
 export function ViewReact() {
@@ -33,6 +34,7 @@ export function ViewReact() {
   const [view, setLayoutType] = useCurrentView()
   const [relationshipBrowserScope, setRelationshipBrowserScope] = useRelationshipBrowserScope(project)
   const [readableHover] = useReadableHover(project)
+  const [readableText] = useReadableText(project)
   const model = useLikeC4Model()
   const { dynamic } = useSearch({
     from: '__root__',
@@ -87,6 +89,7 @@ export function ViewReact() {
       enableCompareWithLatest
       enableNotations={hasNotations}
       readableHover={readableHover}
+      readableText={readableText}
       nodesSelectable
       onNavigateTo={onNavigateTo}
       onLayoutTypeChange={setLayoutType}

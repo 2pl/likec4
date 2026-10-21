@@ -25,6 +25,7 @@ describe('projects virtual module capabilities', () => {
                 defaultScope: 'global',
               },
               readableHover: false,
+              readableText: false,
             },
           },
         },
@@ -41,6 +42,8 @@ describe('projects virtual module capabilities', () => {
     expect(code).toContain('relationshipBrowserDefaultScope: \'global\'')
     expect(code).toContain('readableHover: false')
     expect(code).toContain('readableHover: true')
+    expect(code).toContain('readableText: \'normal\'')
+    expect(code).toContain('readableText: false')
     expect(code).toContain('exportFormats: [\n      \'jpg\',\n      \'dot\',\n      \'drawio\'')
   })
 

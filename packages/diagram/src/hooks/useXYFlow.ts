@@ -9,8 +9,9 @@ import {
 } from '@xyflow/react'
 import { shallowEqual } from 'fast-equals'
 import { useCallback } from 'react'
+import { useReadableTextLevel } from '../context/ReadableTextLevel'
 import type { Types } from '../likec4diagram/types'
-import { calcLabelScale, calcTextScale } from '../utils/textScale'
+import { type ReadableTextLevel, calcLabelScale, calcLevelTextScale } from '../utils/textScale'
 
 export type XYFlowInstance = ReactFlowInstance<Types.AnyNode, Types.AnyEdge>
 export function useXYFlow(): XYFlowInstance {
@@ -64,22 +65,32 @@ export function useIsZoomTooSmall(): boolean {
   return useStore(selectZoom)
 }
 
-const selectTextScale = (state: ReactFlowState) => calcTextScale(state.transform[2])
+const selectTextScale = {
+  normal: (state: ReactFlowState) => calcLevelTextScale(state.transform[2], 'normal'),
+  large: (state: ReactFlowState) => calcLevelTextScale(state.transform[2], 'large'),
+  xlarge: (state: ReactFlowState) => calcLevelTextScale(state.transform[2], 'xlarge'),
+} satisfies Record<ReadableTextLevel, (state: ReactFlowState) => number>
 /**
- * Magnification of the text of the nodes, to keep it readable when the diagram is zoomed out.
+ * Magnification of the text of the nodes, to keep it readable when the diagram is zoomed out
+ * (for the current {@link ReadableTextLevel}).
  * Returns 1 if the text is readable
  * @see calcTextScale
  */
 export function useTextScale(): number {
-  return useStore(selectTextScale)
+  return useStore(selectTextScale[useReadableTextLevel()])
 }
 
-const selectLabelScale = (state: ReactFlowState) => calcLabelScale(state.transform[2])
+const selectLabelScale = {
+  normal: (state: ReactFlowState) => calcLabelScale(state.transform[2], 'normal'),
+  large: (state: ReactFlowState) => calcLabelScale(state.transform[2], 'large'),
+  xlarge: (state: ReactFlowState) => calcLabelScale(state.transform[2], 'xlarge'),
+} satisfies Record<ReadableTextLevel, (state: ReactFlowState) => number>
 /**
- * Magnification of the relationship labels, to keep them readable when the diagram is zoomed out.
+ * Magnification of the relationship labels, to keep them readable when the diagram is zoomed out
+ * (for the current {@link ReadableTextLevel}).
  * Returns 1 if the labels are readable
  * @see calcLabelScale
  */
 export function useLabelScale(): number {
-  return useStore(selectLabelScale)
+  return useStore(selectLabelScale[useReadableTextLevel()])
 }

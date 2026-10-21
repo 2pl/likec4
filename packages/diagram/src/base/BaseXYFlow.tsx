@@ -15,12 +15,14 @@ import {
 } from '@xyflow/react'
 import { type KeyboardEvent, useMemo } from 'react'
 import type { SetRequired, Simplify } from 'type-fest'
+import { useEnabledFeatures } from '../context/DiagramFeatures'
+import { useReadableTextLevel } from '../context/ReadableTextLevel'
 import { useCallbackRef } from '../hooks/useCallbackRef'
 import { useUpdateEffect } from '../hooks/useUpdateEffect'
 import { useIsZoomTooSmall, useLabelScale, useTextScale, useXYFlow, useXYStoreApi } from '../hooks/useXYFlow'
 import type { ViewPadding } from '../LikeC4Diagram.props'
 import { roundDpr } from '../utils/roundDpr'
-import { textScaleProps } from '../utils/textScale'
+import { READABLE_TEXT_LEVELS, textScaleProps } from '../utils/textScale'
 import { stopPropagation } from '../utils/xyflow'
 import { type XYBackground, Background } from './Background'
 import { Base } from './Base'
@@ -90,6 +92,10 @@ export type BaseXYFlowProps<NodeType extends BaseNode, EdgeType extends BaseEdge
     background?: 'transparent' | 'solid' | XYBackground
     fitViewPadding?: ViewPadding | undefined
     onViewportResize?: undefined | (() => void)
+    /**
+     * Limits the magnification of the text of the nodes (e.g. so that the titles still fit)
+     */
+    maxTextScale?: number | undefined
   }
   & SetRequired<
     Omit<
@@ -141,6 +147,7 @@ export function BaseXYFlow<
     showControls = false,
     minZoom = MinZoom,
     maxZoom = MaxZoom,
+    maxTextScale,
     ...props
   }: BaseXYFlowProps<NodeType, EdgeType>,
 ) {
@@ -154,9 +161,13 @@ export function BaseXYFlow<
 
   const isBgWithPattern = background !== 'transparent' && background !== 'solid'
   const isZoomTooSmall = useIsZoomTooSmall()
-  const textScale = useTextScale()
+  const textScale = Math.min(useTextScale(), maxTextScale ?? Infinity)
   const labelScale = useLabelScale()
-  const scaleProps = textScaleProps(textScale, labelScale)
+  const { enableReadableText } = useEnabledFeatures()
+  const readableTextLevel = useReadableTextLevel()
+  const scaleProps = enableReadableText
+    ? textScaleProps(textScale, labelScale, READABLE_TEXT_LEVELS[readableTextLevel].capFactor)
+    : null
   const style = scaleProps ? { ...props.style, ...scaleProps.style } : props.style
   const xyflow = useXYFlow()
   const xystore = useXYStoreApi()

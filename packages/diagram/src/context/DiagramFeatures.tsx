@@ -33,6 +33,10 @@ const FeatureNames = [
    * Scale hover enlargement to keep element/edge-label text readable when zoomed out
    */
   'ReadableHover',
+  /**
+   * Magnify the text when the diagram is zoomed out, to keep it readable
+   */
+  'ReadableText',
 ] as const
 export type FeatureName = typeof FeatureNames[number]
 
@@ -71,6 +75,7 @@ export const DefaultFeatures: EnabledFeatures = {
   enableElementTags: false,
   enableNotes: false,
   enableReadableHover: false,
+  enableReadableText: false,
 }
 const DiagramFeaturesContext = createContext<EnabledFeatures>(DefaultFeatures)
 

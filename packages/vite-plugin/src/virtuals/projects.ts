@@ -5,7 +5,12 @@
 //
 // Portions of this file have been modified by NVIDIA CORPORATION & AFFILIATES.
 
-import type { LikeC4ProjectConfig, RelationshipBrowserScope, WebappExportFormat } from '@likec4/config'
+import type {
+  LikeC4ProjectConfig,
+  ReadableTextLevel,
+  RelationshipBrowserScope,
+  WebappExportFormat,
+} from '@likec4/config'
 import type { NonEmptyArray } from '@likec4/core'
 import JSON5 from 'json5'
 import { map } from 'remeda'
@@ -20,6 +25,7 @@ type ProjectData = {
   landingPage: LikeC4ProjectConfig['landingPage']
   relationshipBrowserDefaultScope: RelationshipBrowserScope
   readableHover: boolean
+  readableText: ReadableTextLevel | false
   exportFormats: WebappExportFormat[]
 }
 
@@ -55,6 +61,13 @@ if (import.meta.hot) {
 }
 `
 
+/**
+ * Normalizes `webapp.readableText` (`true` is the same as `normal`)
+ */
+export function readableTextLevel(value: boolean | ReadableTextLevel | undefined): ReadableTextLevel | false {
+  return value === undefined || value === true ? 'normal' : value
+}
+
 export const projectsModule = {
   id: 'likec4:projects',
   virtualId: 'likec4:plugin/projects.js',
@@ -68,6 +81,7 @@ export const projectsModule = {
         landingPage: p.config.landingPage,
         relationshipBrowserDefaultScope: p.config.webapp?.relationshipsBrowser?.defaultScope ?? 'view',
         readableHover: p.config.webapp?.readableHover ?? true,
+        readableText: readableTextLevel(p.config.webapp?.readableText),
         exportFormats: effectiveWebappExportFormats(p.config),
       }))),
       moduleType: 'js',

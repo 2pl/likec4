@@ -68,6 +68,10 @@ export const RelationshipsBrowserConfigSchema = z.strictObject({
   defaultScope: RelationshipBrowserScopeSchema.default('view'),
 })
 
+export const ReadableTextLevelSchema = z.enum(['normal', 'large', 'xlarge'])
+
+export type ReadableTextLevel = z.infer<typeof ReadableTextLevelSchema>
+
 export const WebappConfigSchema = z
   .strictObject({
     exportFormats: z.array(WebappExportFormatSchema)
@@ -91,6 +95,16 @@ export const WebappConfigSchema = z
           'its main text readable when the diagram is zoomed out, instead of the fixed',
           'small bump. Has no effect on compound (group) nodes.',
           'Enabled by default; set to false to keep the fixed hover bump.',
+        ].join('\n'),
+      }),
+    readableText: z.union([z.boolean(), ReadableTextLevelSchema])
+      .default(true)
+      .meta({
+        description: [
+          'Magnify element titles and relationship labels when the diagram is zoomed out',
+          '(e.g. to fit a large view), so the text stays readable instead of shrinking.',
+          'Enabled by default (true is the same as "normal"); set to false to keep the text at its normal size.',
+          'Use "large" or "xlarge" to keep the text even larger, e.g. when presenting in a meeting room.',
         ].join('\n'),
       }),
   })
