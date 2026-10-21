@@ -53,6 +53,24 @@ export const globalCss = defineGlobalStyles({
     willChange: 'transform',
     zIndex: '{zIndex.diagram.edge.label}',
   },
+  // Raise the hovered edge label above its (unhovered) sibling labels, so an
+  // enlarged hover doesn't render under a neighbour.
+  '.likec4-edge-label-container[data-likec4-hovered="true"]': {
+    zIndex: '{zIndex.diagram.edge.labelHovered}',
+  },
+  // Same for leaf element/deployment nodes (not compounds): raise the xyflow node
+  // wrapper above its sibling nodes while hovered. `!` is required because xyflow
+  // sets `zIndex` as an inline style on `.react-flow__node`.
+  '.react-flow__node:has(.likec4-element-node[data-likec4-hovered="true"])': {
+    zIndex: '{zIndex.diagram.node.elementHovered}!',
+  },
+  // While an edge label is scaled up by hover, relax the lineClamp's `overflow:
+  // hidden` so enlarging the text doesn't clip the top/bottom of its glyphs
+  // against a clipping box sized for the un-scaled text.
+  '.likec4-edge-label-container[data-likec4-hovered="true"] :is(.likec4-edge-label__text, .likec4-edge-label__technology)':
+    {
+      overflow: 'visible!',
+    },
   // Constrain edge label width in the relationship-details overlay,
   // where edges lack labelBBox data. Text and technology lines are
   // clamped to one line each via the rules below.

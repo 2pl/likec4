@@ -24,6 +24,7 @@ import { useEffect, useRef } from 'react'
 import { NotFound } from '../components/NotFound'
 import { headerOps } from '../components/view-page/state'
 import { useCurrentProject, useCurrentView } from '../hooks'
+import { useReadableHover } from '../readable-hover/toggle'
 import { useRelationshipBrowserScope } from '../relationship-browser/scope'
 
 export function ViewReact() {
@@ -31,6 +32,7 @@ export function ViewReact() {
   const project = useCurrentProject()
   const [view, setLayoutType] = useCurrentView()
   const [relationshipBrowserScope, setRelationshipBrowserScope] = useRelationshipBrowserScope(project)
+  const [readableHover] = useReadableHover(project)
   const model = useLikeC4Model()
   const { dynamic } = useSearch({
     from: '__root__',
@@ -84,6 +86,7 @@ export function ViewReact() {
       enableElementTags
       enableCompareWithLatest
       enableNotations={hasNotations}
+      readableHover={readableHover}
       nodesSelectable
       onNavigateTo={onNavigateTo}
       onLayoutTypeChange={setLayoutType}

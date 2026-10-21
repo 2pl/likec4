@@ -37,11 +37,13 @@ export const zIndex = defineTokens.zIndex({
     edge: {
       DEFAULT: { value: 20 },
       label: { value: 25 },
+      labelHovered: { value: 1000, description: 'hovered edge label, raised above its siblings' },
       controlPoint: { value: 30 },
     },
     node: {
       compound: { value: 10 },
       element: { value: 40 },
+      elementHovered: { value: 1000, description: 'hovered leaf element, raised above its siblings' },
     },
   },
 })

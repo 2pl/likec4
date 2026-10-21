@@ -18,6 +18,7 @@ declare module 'likec4:projects' {
     path: string
     landingPage?: LandingPageConfig
     relationshipBrowserDefaultScope: RelationshipBrowserScope
+    readableHover: boolean
     exportFormats: readonly WebappExportFormat[]
   }
   export const isSingleProject: boolean

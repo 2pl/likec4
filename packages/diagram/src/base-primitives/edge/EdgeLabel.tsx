@@ -2,12 +2,17 @@ import type { DiagramEdge } from '@likec4/core/types'
 import { cx } from '@likec4/styles/css'
 import { Box } from '@likec4/styles/jsx'
 import { edgeLabel } from '@likec4/styles/recipes'
+import { useMergedRef } from '@mantine/hooks'
 import type { HTMLMotionProps } from 'motion/react'
 import * as m from 'motion/react-m'
-import { type ReactNode, forwardRef } from 'react'
+import { type ReactNode, forwardRef, useRef } from 'react'
 import { isTruthy } from 'remeda'
 import type { UndefinedOnPartialDeep } from 'type-fest'
 import type { BaseEdgePropsWithData } from '../../base/types'
+import { useEnabledFeatures } from '../../context/DiagramFeatures'
+import { useReadableHoverScale } from '../../hooks/useReadableHoverScale'
+
+const BaselineHoverScale = 1.06
 
 type Data = UndefinedOnPartialDeep<
   Pick<
@@ -49,10 +54,20 @@ export const EdgeLabel = forwardRef<HTMLDivElement, EdgeLabelProps>((
   ref,
 ) => {
   const hasLabel = isTruthy(label) || isTruthy(technology)
+  const isScaledUp = isHovered && !selected
+
+  const { enableReadableHover } = useEnabledFeatures()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const hoverScale = useReadableHoverScale(containerRef, {
+    enabled: enableReadableHover,
+    hovered: isScaledUp,
+    baselineScale: BaselineHoverScale,
+    measureSelector: '.likec4-edge-label__text, .likec4-edge-label__technology',
+  })
 
   return (
     <m.div
-      ref={ref}
+      ref={useMergedRef(ref, containerRef)}
       className={cx(
         // This class is queried by RelationshipPopover to position near the edge label
         'likec4-edge-label',
@@ -65,7 +80,7 @@ export const EdgeLabel = forwardRef<HTMLDivElement, EdgeLabelProps>((
       )}
       data-edge-id={id}
       animate={{
-        scale: isHovered && !selected ? 1.06 : 1,
+        scale: isScaledUp ? hoverScale : 1,
       }}
       {...rest}
     >

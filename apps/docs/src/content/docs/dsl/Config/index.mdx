@@ -279,6 +279,25 @@ The allowed values are `global` and `view`. The default is `view`.
 A saved user preference takes precedence over `defaultScope`.
 The `relationshipsScope` URL parameter takes precedence over both the saved preference and `defaultScope`.
 
+## Readable hover
+
+When the diagram is zoomed out, hovering an element or a relationship label enlarges it just enough to keep its text readable.
+When the text is already readable, hover keeps the usual small enlargement. Groups are not affected.
+
+This is enabled by default. To keep the fixed hover enlargement, disable it:
+
+```jsonc
+{
+  "name": "project-name",
+  "webapp": {
+    "readableHover": false
+  }
+}
+```
+
+Users can also switch it on or off with the toggle in the view header.
+Their choice is saved per project and takes precedence over `readableHover`.
+
 ## Image Aliases
 
 When using local images in your LikeC4 model, you can create aliases for the folder your images are in to make them more readable and the files more transportable.
