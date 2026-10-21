@@ -23,49 +23,103 @@ export const elementNodeData = defineRecipe({
     root: {
       position: 'relative',
       flex: '1',
-      height: 'fit-content',
+      height: {
+        base: 'fit-content',
+        // Definite height, so the content can wrap (and hide) the parts that do not fit
+        _textScaled: `calc(100% / var(--likec4-text-scale, 1))`,
+      },
       width: 'fit-content',
-      maxHeight: '100%',
-      maxWidth: '100%',
+      // When the diagram is zoomed out, the content is laid out in a smaller box (with tight paddings)
+      // and magnified, so the text stays readable (and wraps within the node)
+      maxHeight: {
+        base: '100%',
+        _textScaled: `calc(100% / var(--likec4-text-scale, 1))`,
+      },
+      maxWidth: {
+        base: '100%',
+        _textScaled: `calc(100% / var(--likec4-text-scale, 1))`,
+      },
+      transform: {
+        _textScaled: `scale(var(--likec4-text-scale, 1))`,
+      },
+      transformOrigin: 'center',
       margin: 'auto',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'row',
-      paddingTop: __v('spacing'),
-      paddingBottom: __v('spacing'),
-      paddingLeft: `calc(${__v('spacing')} + 8px)`,
-      paddingRight: `calc(${__v('spacing')} + 8px)`,
+      paddingTop: {
+        base: __v('spacing'),
+        _textScaled: `calc(8px / var(--likec4-text-scale, 1))`,
+      },
+      paddingBottom: {
+        base: __v('spacing'),
+        _textScaled: `calc(8px / var(--likec4-text-scale, 1))`,
+      },
+      paddingLeft: {
+        base: `calc(${__v('spacing')} + 8px)`,
+        _textScaled: `calc(8px / var(--likec4-text-scale, 1))`,
+      },
+      paddingRight: {
+        base: `calc(${__v('spacing')} + 8px)`,
+        _textScaled: `calc(8px / var(--likec4-text-scale, 1))`,
+      },
       overflow: 'hidden',
       pointerEvents: 'none',
       gap: '3',
 
       [textAlign]: 'center',
 
+      // Shapes reserve a room for their decorations, it is magnified together with the content
       _shapeQueue: {
         paddingLeft: '46px',
         paddingRight: '16px',
+        _textScaled: {
+          paddingLeft: `calc(46px / var(--likec4-text-scale, 1))`,
+          paddingRight: `calc(16px / var(--likec4-text-scale, 1))`,
+        },
       },
       _shapeMobile: {
         paddingLeft: '46px',
         paddingRight: '16px',
+        _textScaled: {
+          paddingLeft: `calc(46px / var(--likec4-text-scale, 1))`,
+          paddingRight: `calc(16px / var(--likec4-text-scale, 1))`,
+        },
       },
       _shapeCylinder: {
         paddingTop: '30px',
+        _textScaled: {
+          paddingTop: `calc(30px / var(--likec4-text-scale, 1))`,
+        },
       },
       _shapeStorage: {
         paddingTop: '30px',
+        _textScaled: {
+          paddingTop: `calc(30px / var(--likec4-text-scale, 1))`,
+        },
       },
       _shapeBrowser: {
         paddingTop: '32px',
         paddingBottom: '28px',
+        _textScaled: {
+          paddingTop: `calc(32px / var(--likec4-text-scale, 1))`,
+          paddingBottom: `calc(28px / var(--likec4-text-scale, 1))`,
+        },
       },
       _shapeBucket: {
         paddingLeft: `calc(${__v('spacing')} + 20px)`,
         paddingRight: `calc(${__v('spacing')} + 20px)`,
+        _textScaled: {
+          paddingLeft: `calc(20px / var(--likec4-text-scale, 1))`,
+          paddingRight: `calc(20px / var(--likec4-text-scale, 1))`,
+        },
       },
       _shapeComponent: {
         paddingLeft: `calc(${__v('spacing')} + 30px)`,
+        _textScaled: {
+          paddingLeft: `calc(30px / var(--likec4-text-scale, 1))`,
+        },
       },
 
       _shapeSizeXs: {
@@ -90,10 +144,22 @@ export const elementNodeData = defineRecipe({
       },
     },
     icon: {
-      flex: `0 0 ${__v('icon.size', '48px')}`,
-      height: __v('icon.size', '48px'),
-      width: __v('icon.size', '48px'),
-      display: 'flex',
+      // Not magnified with the text, otherwise it takes the room of the title
+      flex: {
+        base: `0 0 ${__v('icon.size', '48px')}`,
+        _textScaled: `0 0 calc(${__v('icon.size', '48px')} / var(--likec4-text-scale, 1))`,
+      },
+      height: {
+        base: __v('icon.size', '48px'),
+        _textScaled: `calc(${__v('icon.size', '48px')} / var(--likec4-text-scale, 1))`,
+      },
+      width: {
+        base: __v('icon.size', '48px'),
+        _textScaled: `calc(${__v('icon.size', '48px')} / var(--likec4-text-scale, 1))`,
+      },
+      display: {
+        base: 'flex',
+      },
       alignSelf: 'flex-start',
       alignItems: 'center',
       justifyContent: 'center',
@@ -133,7 +199,17 @@ export const elementNodeData = defineRecipe({
       flexDirection: 'column',
       alignItems: 'stretch',
       justifyContent: 'center',
-      flexWrap: 'nowrap',
+      // Magnified: title, technology and description are in separate columns,
+      // those that do not fit the height move out of the (clipped) box, instead of being cut in half
+      flexWrap: {
+        base: 'nowrap',
+        _textScaled: 'wrap',
+      },
+      '& > *': {
+        width: {
+          _textScaled: '100%',
+        },
+      },
       overflow: 'hidden',
       gap: '2',
       '&:has([data-likec4-node-description]):has([data-likec4-node-technology])': {
@@ -149,6 +225,13 @@ export const elementNodeData = defineRecipe({
       lineHeight: 'sm',
       textWrapStyle: 'balance',
       whiteSpace: 'preserve-breaks',
+      // Magnified text must not be clipped by a narrow node
+      hyphens: {
+        _textScaled: 'auto',
+      },
+      overflowWrap: {
+        _textScaled: 'anywhere',
+      },
 
       textAlign: varTextAlign,
       color: __v('palette.hiContrast'),

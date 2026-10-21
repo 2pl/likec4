@@ -10,6 +10,7 @@ import {
 import { shallowEqual } from 'fast-equals'
 import { useCallback } from 'react'
 import type { Types } from '../likec4diagram/types'
+import { calcLabelScale, calcTextScale } from '../utils/textScale'
 
 export type XYFlowInstance = ReactFlowInstance<Types.AnyNode, Types.AnyEdge>
 export function useXYFlow(): XYFlowInstance {
@@ -61,4 +62,24 @@ export function useCurrentZoomAtLeast(minZoom: number): boolean {
 const selectZoom = (state: ReactFlowState) => state.transform[2] < 0.2
 export function useIsZoomTooSmall(): boolean {
   return useStore(selectZoom)
+}
+
+const selectTextScale = (state: ReactFlowState) => calcTextScale(state.transform[2])
+/**
+ * Magnification of the text of the nodes, to keep it readable when the diagram is zoomed out.
+ * Returns 1 if the text is readable
+ * @see calcTextScale
+ */
+export function useTextScale(): number {
+  return useStore(selectTextScale)
+}
+
+const selectLabelScale = (state: ReactFlowState) => calcLabelScale(state.transform[2])
+/**
+ * Magnification of the relationship labels, to keep them readable when the diagram is zoomed out.
+ * Returns 1 if the labels are readable
+ * @see calcLabelScale
+ */
+export function useLabelScale(): number {
+  return useStore(selectLabelScale)
 }

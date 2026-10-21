@@ -1,0 +1,147 @@
+views {
+
+  view index {
+    title 'Trading App - System Landscape'
+    description 'Who uses the platform and which external parties it depends on'
+
+    include *
+
+    style trading {
+      color primary
+    }
+  }
+
+  view platform of trading {
+    title 'Trading Platform - Domains'
+
+    include *
+    autoLayout TopBottom
+  }
+
+  view order-execution of trading.core {
+    title 'Order Execution'
+    description 'Order intake, risk checks, routing and venue connectivity'
+
+    include *
+    autoLayout LeftRight
+  }
+
+  view market-data of trading.marketData {
+    title 'Market Data'
+
+    include *
+    autoLayout LeftRight
+  }
+
+  view accounts of trading.accounts {
+    title 'Accounts & Funds'
+
+    include *
+  }
+
+  view critical-path {
+    title 'Critical Path'
+    description 'Everything that must stay up during market hours'
+
+    include
+      trader,
+      exchanges,
+      trading.clients.*,
+      element.tag = #critical
+
+    style element.tag = #lowLatency {
+      color red
+    }
+  }
+}
+
+views 'Flows' {
+
+  dynamic view place-order {
+    title 'Place a Market Order'
+    variant sequence
+
+    trader -> trading.clients.mobile 'Taps Buy'
+    trading.clients.mobile -> trading.edge.apiGateway 'POST /orders'
+    trading.edge.apiGateway -> trading.edge.auth 'Validates session'
+    trading.edge.apiGateway -> trading.core.orderService 'Submit order'
+    trading.core.orderService -> trading.core.riskEngine 'Pre-trade check' {
+      notes '''
+        Checks **buying power**, position limits and price collars.
+        Must answer in under 1 ms.
+      '''
+    }
+
+    alt {
+      when 'Risk check passed' {
+        trading.core.orderService -> trading.core.ordersDb 'Persist order'
+        trading.core.orderService -> trading.events 'OrderAccepted'
+        trading.edge.apiGateway <- trading.core.orderService '202 Accepted'
+        trading.events -> trading.core.router 'OrderAccepted'
+        trading.core.router -> trading.core.executionGateway 'Route to best venue'
+        trading.core.executionGateway -> exchanges 'NewOrderSingle' {
+          technology 'FIX 4.4'
+        }
+        trading.core.executionGateway <- exchanges 'ExecutionReport (fill)'
+        trading.core.executionGateway -> trading.events 'OrderFilled'
+        parallel {
+          trading.events -> trading.accounts.portfolioService 'Update position'
+          trading.events -> trading.compliance.surveillance 'Screen trade'
+          trading.events -> trading.notifier 'Notify trader'
+        }
+      }
+      else 'Risk check failed' {
+        trading.edge.apiGateway <- trading.core.orderService '422 Rejected'
+        trading.clients.mobile <- trading.edge.apiGateway 'Shows rejection reason'
+      }
+    }
+  }
+
+  dynamic view live-quotes {
+    title 'Live Quote Streaming'
+
+    exchanges -> trading.marketData.feedHandler 'Raw ticks'
+    parallel {
+      trading.marketData.feedHandler -> trading.marketData.quoteCache 'Update top of book'
+      trading.marketData.feedHandler -> trading.events 'Publish tick'
+    }
+    trading.events -> trading.marketData.quoteService 'Consume ticks'
+    trading.marketData.quoteService -> trading.marketData.tickStore 'Aggregate candles'
+    trading.edge.apiGateway <- trading.marketData.quoteService 'Push quote'
+    trading.clients.web <- trading.edge.apiGateway 'WebSocket frame'
+    trader <- trading.clients.web 'Sees price move'
+  }
+
+  dynamic view deposit-funds {
+    title 'Deposit Funds'
+    variant sequence
+
+    trader -> trading.clients.web 'Requests deposit'
+    trading.clients.web -> trading.edge.apiGateway 'POST /deposits'
+    trading.edge.apiGateway -> trading.accounts.walletService 'Create deposit'
+    try {
+      trading.accounts.walletService -> bank 'Initiate ACH pull'
+      trading.accounts.walletService <- bank 'Transfer settled'
+      trading.accounts.walletService -> trading.accounts.ledgerDb 'Credit cash balance'
+    }
+    catch 'Transfer returned' {
+      trading.accounts.walletService -> trading.accounts.ledgerDb 'Reverse provisional credit'
+    }
+    trading.edge.apiGateway <- trading.accounts.walletService 'Deposit status'
+  }
+}
+
+views 'Deployment' {
+
+  deployment view production {
+    title 'Production Deployment'
+
+    include
+      device.*,
+      prod.**
+
+    style prod.ny4._ {
+      color red
+    }
+  }
+}

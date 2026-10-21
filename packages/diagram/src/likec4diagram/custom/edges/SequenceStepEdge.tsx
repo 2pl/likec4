@@ -9,6 +9,7 @@ import { getSmoothStepPath } from '@xyflow/system'
 import { EdgeActionButton, EdgeContainer, EdgeLabel, EdgeLabelContainer, EdgePath } from '../../../base-primitives'
 import { useEnabledFeatures } from '../../../context/DiagramFeatures'
 import { useDiagram } from '../../../hooks/useDiagram'
+import type { CSSVariables } from '../../../utils/textScale'
 import type { Types } from '../../types'
 import { EdgeDrifts } from './EdgeDrifts'
 
@@ -61,6 +62,8 @@ export function SequenceStepEdge(props: Types.EdgeProps<'seq-step'>) {
       {enableCompareWithLatest && <EdgeDrifts edgeProps={props} svgPath={path} />}
       <EdgeLabelContainer
         edgeProps={props}
+        // Magnified label grows away from the source actor
+        style={{ '--likec4-edge-label-origin': isBack ? 'right top' : 'left top' } as CSSVariables}
         labelPosition={{
           x: labelX,
           y: props.sourceY + (!isSelfLoop ? LABEL_OFFSET : 0),
