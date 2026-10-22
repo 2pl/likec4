@@ -604,7 +604,7 @@ const Relationship = forwardRef<
               },
             }}
           >
-            <Markdown value={r.summary} fontSize={'sm'} textScale={0.875 * textScale} />
+            <Markdown value={r.summary} fontSize={'md'} textScale={textScale} />
           </Box>
         </>
       )}
