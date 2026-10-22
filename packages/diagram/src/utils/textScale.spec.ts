@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   calcLabelScale,
   calcLevelTextScale,
+  calcPopoverTextScale,
   calcTextScale,
   MAX_TEXT_SCALE,
   READABLE_TEXT_LEVELS,
@@ -120,5 +121,17 @@ describe('readable text levels', () => {
   it('passes the limit factor of the preset only when it differs from the default', () => {
     expect(textScaleProps(1.4, 1.4, 1.3)?.style['--likec4-text-cap']).toBe(1.3)
     expect(textScaleProps(1.4, 1.4)?.style).not.toHaveProperty('--likec4-text-cap')
+  })
+})
+
+describe('calcPopoverTextScale', () => {
+  it('keeps the popover text as is when readable text is disabled or normal', () => {
+    expect(calcPopoverTextScale(false)).toBe(1)
+    expect(calcPopoverTextScale('normal')).toBe(1)
+  })
+
+  it('larger levels magnify the popover text more', () => {
+    expect(calcPopoverTextScale('large')).toBeGreaterThan(1)
+    expect(calcPopoverTextScale('xlarge')).toBeGreaterThan(calcPopoverTextScale('large'))
   })
 })
