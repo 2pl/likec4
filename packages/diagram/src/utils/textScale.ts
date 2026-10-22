@@ -46,6 +46,11 @@ export type ReadableTextLevelValues = {
    * Multiplier of the magnification limits set by the preset (edge types, compound titles)
    */
   capFactor: number
+  /**
+   * Magnification of the text in the popovers (i.e. relationship details on hover).
+   * Popovers are not zoomed with the diagram, so it depends on the level only
+   */
+  popover: number
 }
 
 /**
@@ -56,16 +61,19 @@ export const READABLE_TEXT_LEVELS: Record<ReadableTextLevel, ReadableTextLevelVa
     text: { readable: READABLE_TEXT_SCALE, max: MAX_TEXT_SCALE },
     label: { readable: READABLE_LABEL_SCALE, max: MAX_LABEL_SCALE },
     capFactor: 1,
+    popover: 1,
   },
   large: {
     text: { readable: 1, max: 3.4 },
     label: { readable: 1.2, max: 4.2 },
     capFactor: 1.3,
+    popover: 1.25,
   },
   xlarge: {
     text: { readable: 1.4, max: 4.2 },
     label: { readable: 1.6, max: 5.2 },
     capFactor: 1.6,
+    popover: 1.5,
   },
 }
 
@@ -106,6 +114,14 @@ export function calcLabelScale(zoom: number, level: ReadableTextLevel = 'normal'
 export function calcLevelTextScale(zoom: number, level: ReadableTextLevel): number {
   const { readable, max } = READABLE_TEXT_LEVELS[level].text
   return calcTextScale(zoom, readable, max)
+}
+
+/**
+ * Magnification of the text in the popovers for a given {@link ReadableTextLevel}
+ * (`false` when readable text is disabled).
+ */
+export function calcPopoverTextScale(level: ReadableTextLevel | false): number {
+  return level === false ? 1 : READABLE_TEXT_LEVELS[level].popover
 }
 
 export type TextScaleProps = {

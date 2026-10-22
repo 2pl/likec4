@@ -41,9 +41,11 @@ import { Link } from '../../components/Link'
 import { PortalToContainer } from '../../components/PortalToContainer'
 import { useRootContainerRef } from '../../context'
 import { useEnabledFeatures } from '../../context/DiagramFeatures'
+import { useReadableTextLevel } from '../../context/ReadableTextLevel'
 import { selectDiagramContext, useDiagram, useDiagramSelector, useOnDiagramEvent } from '../../hooks/useDiagram'
 import { useLikeC4Model } from '../../hooks/useLikeC4Model'
 import { roundDpr } from '../../utils'
+import { calcPopoverTextScale } from '../../utils/textScale'
 import { findDiagramEdge, findDiagramNode } from '../state/utils'
 import { RelationshipPopoverActorLogic } from './actor'
 import { Endpoint, RelationshipTitle } from './components'
@@ -212,7 +214,9 @@ const RelationshipPopoverInternal = ({
   onMouseLeave,
 }: RelationshipPopoverInternalProps) => {
   const ref = useRef<HTMLDivElement>(null)
-  const { enableNavigateTo, enableVscode } = useEnabledFeatures()
+  const { enableNavigateTo, enableVscode, enableReadableText } = useEnabledFeatures()
+  const readableTextLevel = useReadableTextLevel()
+  const textScale = calcPopoverTextScale(enableReadableText ? readableTextLevel : false)
 
   const containerRef = useRootContainerRef()
 
@@ -255,7 +259,7 @@ const RelationshipPopoverInternal = ({
                 return
               }
               Object.assign(elements.floating.style, {
-                maxWidth: `${clamp(roundDpr(availableWidth), { min: 220, max: 450 })}px`,
+                maxWidth: `${clamp(roundDpr(availableWidth), { min: 220, max: 450 * textScale })}px`,
                 maxHeight: `${clamp(roundDpr(availableHeight), { min: 80, max: 500 })}px`,
               })
             },
@@ -284,7 +288,7 @@ const RelationshipPopoverInternal = ({
       wasCanceled = true
       cleanup()
     }
-  }, [referenceEl])
+  }, [referenceEl, textScale])
 
   const diagram = useDiagram()
 
@@ -295,6 +299,7 @@ const RelationshipPopoverInternal = ({
         relationship={relationship}
         sourceNode={sourceNode}
         targetNode={targetNode}
+        textScale={textScale}
         onNavigateTo={enableNavigateTo
             && relationship.$relationship.navigateTo
             && relationship.$relationship.navigateTo !== viewId
@@ -399,6 +404,10 @@ const Relationship = forwardRef<
     relationship: LikeC4Model.AnyRelation
     sourceNode: DiagramNode
     targetNode: DiagramNode
+    /**
+     * Magnification of the text (title, kind, technology and description)
+     */
+    textScale: number
     onOpenSource?: (() => void) | undefined
     onNavigateTo?: (() => void) | undefined
   }
@@ -406,6 +415,7 @@ const Relationship = forwardRef<
   relationship: r,
   sourceNode,
   targetNode,
+  textScale,
   onNavigateTo,
   onOpenSource,
 }, ref) => {
@@ -469,6 +479,7 @@ const Relationship = forwardRef<
   return (
     <VStack
       ref={ref}
+      style={textScale !== 1 ? { ['--likec4-popover-text-scale' as string]: textScale } : undefined}
       className={bleed({
         block: '2',
         inline: '2',
@@ -567,16 +578,13 @@ const Relationship = forwardRef<
       {r.kind && (
         <HStack gap="2">
           <Label>kind</Label>
-          <Text size="xs" className={css({ userSelect: 'all', wordBreak: 'break-word', minWidth: '0' })}>{r.kind}</Text>
+          <Text fz={scaledValueFz} className={scaledValue}>{r.kind}</Text>
         </HStack>
       )}
       {r.technology && (
         <HStack gap="2">
           <Label>technology</Label>
-          <Text
-            size="xs"
-            className={css({ userSelect: 'all', wordBreak: 'break-word', minWidth: '0' })}
-          >
+          <Text fz={scaledValueFz} className={scaledValue}>
             {r.technology}
           </Text>
         </HStack>
@@ -596,7 +604,7 @@ const Relationship = forwardRef<
               },
             }}
           >
-            <Markdown value={r.summary} fontSize={'sm'} textScale={0.875} />
+            <Markdown value={r.summary} fontSize={'sm'} textScale={0.875 * textScale} />
           </Box>
         </>
       )}
@@ -611,6 +619,13 @@ const Relationship = forwardRef<
     </VStack>
   )
 })
+
+const scaledValue = css({
+  userSelect: 'all',
+  wordBreak: 'break-word',
+  minWidth: '0',
+})
+const scaledValueFz = 'calc(var(--mantine-font-size-xs) * var(--likec4-popover-text-scale, 1))'
 
 const Label = styled('div', {
   base: {

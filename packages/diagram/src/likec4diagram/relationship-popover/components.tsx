@@ -41,7 +41,7 @@ export const Endpoint = ({ children, likec4color }: PropsWithChildren<{ likec4co
 export const RelationshipTitle = styled('div', {
   base: {
     whiteSpaceCollapse: 'preserve-breaks',
-    fontSize: 'sm',
+    fontSize: '[calc({fontSizes.sm} * var(--likec4-popover-text-scale, 1))]',
     lineHeight: 'sm',
     userSelect: 'all',
     overflowWrap: 'anywhere',
